@@ -41,8 +41,11 @@ func main() {
 	input := bufio.NewScanner(os.Stdin)
 	for input.Scan() {
 		line := input.Text()
-		for _, conn := range conns {
-			conn.Write([]byte(line))
+		for i, conn := range conns {
+			_, err := conn.Write([]byte(line))
+			if err != nil {
+				conns = append(conns[:i], conns[i+1:]...)
+			}
 		}
 	}
 }
