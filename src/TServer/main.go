@@ -4,14 +4,22 @@ import (
 	"DBProxy"
 	"bufio"
 	"encoding/binary"
+	"flag"
+	"fmt"
+	"github.com/gorilla/websocket"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	gamepb "pb"
 )
 
 var (
-	conns []net.Conn
+	conns    []net.Conn
+	addr     = flag.String("addr", "localhost:9999", "http service address")
+	upgrader = websocket.Upgrader{}
 )
 
 const (
@@ -19,6 +27,16 @@ const (
 )
 
 func main() {
+	flag.Parse()
+	log.SetFlags(0)
+
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.GET("/ws", hello)
+	e.Logger.Fatal(e.Start(":8081"))
+	log.Fatal(http.ListenAndServe(*addr, nil))
+
 	// 初始化数据库
 	DBProxy.GetInstance().Init()
 
@@ -89,5 +107,27 @@ func handler(conn net.Conn) {
 				pbHandler(tmp[8:len], &conn)
 			}
 		}
+	}
+}
+func hello(c echo.Context) error {
+	ws, err := upgrader.Upgrade(c.Response(), c.Request(), c.Request().Header)
+	if err != nil {
+		return err
+	}
+	defer ws.Close()
+
+	for {
+		// Write
+		err := ws.WriteMessage(websocket.TextMessage, []byte("Hello, Client!"))
+		if err != nil {
+			c.Logger().Error(err)
+		}
+
+		// Read
+		_, msg, err := ws.ReadMessage()
+		if err != nil {
+			c.Logger().Error(err)
+		}
+		fmt.Printf("%s\n", msg)
 	}
 }
