@@ -1,9 +1,15 @@
 package main
 
 import (
+	"bufio"
+	"encoding/binary"
 	"flag"
+	"github.com/golang/protobuf/proto"
 	"log"
 	"net"
+	"os"
+	gamepb "pb"
+	"reflect"
 	"time"
 )
 
@@ -27,13 +33,35 @@ func main() {
 		log.Fatal("cannot connect to server!!!")
 	}
 
-	for {
-		var tmp = make([]byte, 8192)
-		if len, err := conn.Read(tmp); len > 0 && err == nil {
-			log.Println(string(tmp[:len]))
+	go handler()
+
+	input := bufio.NewScanner(os.Stdin)
+	for input.Scan() {
+		//line := input.Text()
+		protocol := &gamepb.C2SGobangStep{Point: &gamepb.Point{
+			X: 1, Y: 2,
+		}}
+		if out, err := proto.Marshal(protocol); err != nil {
+
+		} else {
+			conn.Write(out)
 		}
 	}
 }
+
+func handler() {
+	for {
+		var tmp = make([]byte, 8192)
+		if len, err := conn.Read(tmp); len > 0 && err == nil {
+			ping := &gamepb.S2CPing{}
+			if err := proto.Unmarshal(tmp, ping); err != nil {
+
+			}
+			log.Println(ping, ". Ping:", time.Now().Unix()-ping.Timestamp)
+		}
+	}
+}
+
 func connect() (net.Conn, error) {
 	c, err := net.Dial("tcp", "localhost:"+*port)
 	if err != nil {
@@ -44,9 +72,20 @@ func connect() (net.Conn, error) {
 	}
 	return c, nil
 }
+
 func ping() {
 	for {
-		len, err := conn.Write([]byte("ping"))
+		ping := &gamepb.C2SPing{Timestamp: time.Now().Unix()}
+		out, err := proto.Marshal(ping)
+		if err != nil {
+			log.Fatalln("Failed to encode ping:", err)
+		}
+
+		prefix := make([]byte, 8)
+		binary.LittleEndian.PutUint32(prefix, uint32(len(out)+4+4))
+		binary.LittleEndian.PutUint32(prefix[4:], uint32(gamepb.ProtocolTypeMap[reflect.TypeOf(ping)]))
+		prefix = append(prefix, out...)
+		len, err := conn.Write(prefix)
 		if err != nil {
 			log.Println("cannot connect to server, error:", err, len)
 			go reconnect()
@@ -54,7 +93,7 @@ func ping() {
 		} else {
 			log.Println("ping to server...")
 		}
-		time.Sleep(time.Millisecond * 1000)
+		time.Sleep(time.Millisecond * 5000)
 	}
 }
 
