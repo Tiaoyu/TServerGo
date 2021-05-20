@@ -15,3 +15,8 @@
 go get github.com/labstack/echo/v4/middleware
 go get github.com/labstack/echo/v4
 ```
+
+## 问题
+
+1. websocket server无法被连接上
+：增加子域名game.tiaoyuyu.com, 并加上ssl证书 使用nginx将子域名代理到websocket服务端口上
