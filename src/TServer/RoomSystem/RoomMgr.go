@@ -6,79 +6,78 @@
 package RoomSystem
 
 import (
+	"TServer/PB"
+	"TServer/UserSystem"
+	"encoding/json"
 	"log"
-	gamepb "pb"
-	"time"
 )
 
 type Room struct {
-	RedId         int32
-	BlackId       int32
+	RedId         string
+	BlackId       string
 	CreateTime    int64
-	ChessStepList []gamepb.ChessStep
-	GobangInfo    [15][15]int32
-	TurnId        int32 // 当前手
-}
-
-type Role struct {
-	RoleId int32
-	Score  int32
+	ChessStepList []PB.ChessStep
+	GobangInfo    [15][15]string
+	TurnId        string // 当前手
+	MsgChannel    chan PB.ChessStep
 }
 
 var (
-	MatchPool   map[int32]struct{}
-	RoomUserMap map[int32]*Room
+	RoomOpenIdMap = make(map[string]*Room)
 )
 
-// JoinMatch 加入匹配
-func JoinMatch(roleId int32) {
-	MatchPool[roleId] = struct{}{}
-}
+func RoomLogic(room *Room) error {
+	redPlayer, ok := UserSystem.PlayerOpenIdMap[room.RedId]
+	if !ok {
+		return nil
+	}
+	blackPlayer, ok := UserSystem.PlayerOpenIdMap[room.BlackId]
+	if !ok {
+		return nil
+	}
+	res, _ := json.Marshal(&PB.MatchAck{
+		Id:             1302,
+		ErrorCode:      "SUCCESS",
+		EnemyName:      blackPlayer.NickName,
+		EnemyAvatarUrl: blackPlayer.AvatarUrl,
+		Color:          "RED",
+	})
+	redPlayer.SendChannel <- res
+	res, _ = json.Marshal(&PB.MatchAck{
+		Id:             1302,
+		ErrorCode:      "SUCCESS",
+		EnemyName:      redPlayer.NickName,
+		EnemyAvatarUrl: redPlayer.AvatarUrl,
+		Color:          "BLACK",
+	})
+	blackPlayer.SendChannel <- res
 
-// Matching 匹配
-func Matching(roleId int32) {
-	for {
-		var roleList []int32
-		if len(MatchPool) > 2 {
-			for k, _ := range MatchPool {
-				roleList = append(roleList, k)
-				delete(MatchPool, k)
-				if len(roleList) == 2 {
-					break
-				}
+	RoomOpenIdMap[room.RedId] = room
+	RoomOpenIdMap[room.BlackId] = room
+	room.MsgChannel = make(chan PB.ChessStep, 0)
+
+	go func() {
+		for {
+			select {
+			case step := <-room.MsgChannel:
+				log.Println(step.Color, " step to ", step.Pos)
+				room.GobangInfo[step.Pos.X][step.Pos.Y] = step.Color
+				room.ChessStepList = append(room.ChessStepList, step)
+				res, _ := json.Marshal(&PB.ChessStepAck{
+					Id:        1302,
+					ErrorCode: "SUCCESS",
+					Steps:     room.ChessStepList,
+				})
+				log.Println("step list:", string(res))
+				UserSystem.GetPlayerByOpenId(room.RedId).SendChannel <- res
+				UserSystem.GetPlayerByOpenId(room.BlackId).SendChannel <- res
 			}
-
-			room := &Room{RedId: roleList[0], BlackId: roleList[1], CreateTime: time.Now().Unix(),
-				ChessStepList: make([]gamepb.ChessStep, 0), GobangInfo: [15][15]int32{}, TurnId: roleList[0]}
-			go RoomLogic(room)
+			// 判断胜负
 		}
-	}
-}
-
-func RoomLogic(room *Room) {
-	log.Println("Match success. RedId:", room.RedId, " BlackId:", room.BlackId)
-	RoomUserMap[room.RedId] = room
-	RoomUserMap[room.BlackId] = room
-	//gobang := [15][15]int32{
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	//}
-	// 游戏主循环
-	for {
-		// TODO
-		log.Println(time.Now().Unix())
-	}
+		delete(RoomOpenIdMap, room.RedId)
+		delete(RoomOpenIdMap, room.BlackId)
+		log.Println("room destroyed!")
+	}()
+	log.Println("create room success, RedId:", room.RedId, " BlackId:", room.BlackId)
+	return nil
 }

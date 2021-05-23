@@ -65,14 +65,93 @@ Res ID : 1102
 | openId    | string |          |
 
 ```json
-{
-    "id": 1101,
-    "token":"031IAJ0w32ruoW2bJJ3w3eaBxX1IAJ0A",
-    "nickName":"0.0",
-    "avatarUrl":"https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIcOPgba5had6WBXqu8V1ZFsdcVkJy83RfWbrQ5k0qQkg8F0AWJqACUmKq6Oib1ASdyibq8CPl283QA/132"
-}
+{"id": 1101,"nickName":"条鱼鱼丶炕","token":"0311lZ000MMFKL1qpI100iKyxo41lZ0s","avatarUrl":""}
 ```
 
+### 匹配
+
+Req ID:  1201
+
+| -   |     |      |
+| --- | --- | ---- |
+| id  | int | 1201 |
+
+Res ID: 1202
+
+| -              |        |          |            |
+| -------------- | ------ | -------- | ---------- |
+| id             | int    | 1202     |            |
+| errorCode      | string | MATCHING | 正在匹配中 |
+|                |        | FAILED   | 匹配失败   |
+|                |        | TIMEOUT  | 匹配超时   |
+|                |        | SUCCESS  | 匹配成功   |
+| enemyName      | string |          | 对手名字   |
+| enemyAvatarUrl | string |          | 对手头像   |
+| color          | string | RED      | 红方(先手) |
+|                |        | BLACK    | 黑方       |
+
+```json
+{"id":1201}
+```
+
+### 走棋
+
+Req ID: 1301
+
+| -    |      |      |
+| ---- | ---- | ---- |
+| id   | int  | 1301 |
+| steo | step |      |
+
+step
+
+| -     |        |
+| ----- | ------ |
+| pos   | pos    |
+| color | string |
+
+
+pos
+
+| -   |     |
+| --- | --- |
+| X   | int |
+| Y   | int |
+
+
+Res ID: 1302
+
+| -         |        |                   |
+| --------- | ------ | ----------------- |
+| id        | int    | 1302              |
+| errorCode | string |                   |
+| steps     | ste[]  | 数组 记录所有步数 |
+
+## 流程图
+
+```mermaid
+sequenceDiagram
+note over client,server : 登陆流程
+client ->> server : 登陆1101
+server ->> WX_API : 验证登陆信息
+WX_API -->> server : 保存登陆结果
+server ->> server : 关联登陆玩家信息
+server -->> client : 登陆结果1102
+note over client,server : PING
+client ->> server : 登陆成功则5秒一次PING 1001
+server ->> client : PONG 1002
+
+note over client,serve : 匹配
+client ->> server : 发起匹配 1201
+server ->> server : 放入匹配池子
+server -->> client : 返回当前匹配状态 1202
+server ->> client : 找到对手后返回匹配信息 1202
+
+note over client,server : 走棋
+client ->> server : 走一步
+server ->> server : 判断当前局势
+server ->> client : 推送给玩家局势信息
+```
 
 ## 协议
 
@@ -80,12 +159,3 @@ Res ID : 1102
 t这个协议号是 1001，1001转成byte数组后，数组长度为4
 10 + 4 + 4 = 18
 [长度][协议号][协议本身]
-
-
-
-属性	类型	说明
-openid	string	用户唯一标识
-session_key	string	会话密钥
-unionid	string
-errcode	number	错误码
-errmsg	string	错误信息

@@ -1,24 +1,52 @@
 package UserSystem
 
 import (
-	"net"
+	"github.com/gorilla/websocket"
+	"log"
 )
 
-type User struct {
-	conn   *net.Conn
-	RoleId int32
+// Player 玩家数据
+type Player struct {
+	OpenId      string
+	NickName    string
+	AvatarUrl   string
+	RemoteAddr  string
+	SessionKey  string
+	SendChannel chan []byte
+	Conn        *websocket.Conn
 }
 
 var (
-	UserMap       map[string]*User
-	UserRoleIdMap map[int32]*User
+	PlayerOpenIdMap = make(map[string]*Player)
+	PlayerRemoteMap = make(map[string]*Player)
 )
 
-func UserLogin(u *User) {
-	UserMap[(*u.conn).RemoteAddr().String()] = u
-	UserRoleIdMap[u.RoleId] = u
+func PlayerLogin(u *Player) {
+	PlayerRemoteMap[u.RemoteAddr] = u
+	PlayerOpenIdMap[u.OpenId] = u
+	go func() {
+		for {
+			select {
+			case res := <-u.SendChannel:
+				u.Conn.WriteMessage(websocket.TextMessage, res)
+			}
+		}
+	}()
+	log.Println(u.NickName, " login success, OpenId:", u.OpenId)
 }
 
-func GetUserByAddr(addr string) *User {
-	return UserMap[addr]
+func GetPlayerByAddr(addr string) *Player {
+	p, ok := PlayerRemoteMap[addr]
+	if !ok {
+		return nil
+	}
+	return p
+}
+
+func GetPlayerByOpenId(openId string) *Player {
+	p, ok := PlayerOpenIdMap[openId]
+	if !ok {
+		return nil
+	}
+	return p
 }
