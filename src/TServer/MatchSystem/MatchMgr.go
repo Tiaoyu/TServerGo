@@ -4,6 +4,7 @@ import (
 	"TServer/PB"
 	"TServer/RoomSystem"
 	"TServer/UserSystem"
+	"log"
 	"time"
 )
 
@@ -21,7 +22,6 @@ func init() {
 	// 匹配线程
 	go func() {
 		pair := make([]*MatchItem, 0)
-
 		for {
 			select {
 			case item := <-matchPool:
@@ -47,7 +47,7 @@ func init() {
 }
 
 func JoinMatch(player *UserSystem.Player) {
-	if _, ok := matchMap[player.OpenId]; !ok {
+	if _, ok := matchMap[player.OpenId]; ok {
 		return
 	}
 
@@ -57,4 +57,5 @@ func JoinMatch(player *UserSystem.Player) {
 	}
 	matchMap[player.OpenId] = struct{}{}
 	matchPool <- item
+	log.Println(player.OpenId, " join to match.")
 }

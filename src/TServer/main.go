@@ -37,7 +37,6 @@ func hello(c echo.Context) error {
 
 	for {
 		// Write
-		err := ws.WriteMessage(websocket.TextMessage, []byte("Hello, Client!"))
 		if err != nil {
 			c.Logger().Error(err)
 		}
