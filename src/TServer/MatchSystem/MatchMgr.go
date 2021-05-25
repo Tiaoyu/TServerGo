@@ -3,11 +3,13 @@ package MatchSystem
 import (
 	"TServer/PB"
 	"TServer/RoomSystem"
+	"TServer/UserSystem"
 	"time"
 )
 
 var (
-	matchPool = make(chan *MatchItem, 2)
+	matchPool = make(chan *MatchItem, 0)
+	matchMap  = make(map[string]struct{}, 0)
 )
 
 type MatchItem struct {
@@ -35,6 +37,8 @@ func init() {
 					GobangInfo:    [15][15]string{},
 					TurnId:        pair[0].OpenId,
 				}
+				delete(matchMap, pair[0].OpenId)
+				delete(matchMap, pair[1].OpenId)
 				RoomSystem.RoomLogic(room)
 				pair = make([]*MatchItem, 0)
 			}
@@ -42,10 +46,15 @@ func init() {
 	}()
 }
 
-func JoinMatch(openId, remoteAddr string) {
-	item := &MatchItem{
-		OpenId:     openId,
-		RemoteAddr: remoteAddr,
+func JoinMatch(player *UserSystem.Player) {
+	if _, ok := matchMap[player.OpenId]; !ok {
+		return
 	}
+
+	item := &MatchItem{
+		OpenId:     player.OpenId,
+		RemoteAddr: player.RemoteAddr,
+	}
+	matchMap[player.OpenId] = struct{}{}
 	matchPool <- item
 }

@@ -93,6 +93,7 @@ func handlerJson(ws *websocket.Conn, msg []byte) ([]byte, error) {
 			Conn:        ws,
 		}
 		UserSystem.PlayerLogin(player)
+		player.SendChannel <- res
 		return res, err
 	case 1201: // 匹配
 		req := &PB.MatchReq{}
@@ -104,7 +105,7 @@ func handlerJson(ws *websocket.Conn, msg []byte) ([]byte, error) {
 		if !ok {
 			return nil, nil
 		}
-		MatchSystem.JoinMatch(player.OpenId, player.RemoteAddr)
+		MatchSystem.JoinMatch(player)
 
 		res, err := json.Marshal(&PB.MatchAck{
 			Id:        1202,
