@@ -39,9 +39,16 @@ type MatchReq struct {
 	MatchType int
 }
 
+// 匹配类型
 const (
 	MatchTypeMatch  = 1
 	MatchTypeCancel = 2
+)
+
+// 对局双方类型
+const (
+	ColorTypeRed   = 1 // 红方
+	ColorTypeBlack = 2 // 黑方
 )
 
 type MatchAck struct {
@@ -49,14 +56,14 @@ type MatchAck struct {
 	ErrorCode      string
 	EnemyName      string // 敌方阵营
 	EnemyAvatarUrl string // 敌方头像
-	Color          string // 阵营（红方、黑方）
+	Color          int    // 阵营（红方、黑方）
 }
 
 // ChessStepReq 走棋
 type ChessStepReq struct {
 	Id    int
 	Step  ChessStep
-	Color string
+	Color int
 }
 type ChessStepAck struct {
 	Id        int
@@ -67,10 +74,17 @@ type ChessStepAck struct {
 // ChessStep 一步棋
 type ChessStep struct {
 	Pos   Pos
-	Color string
+	Color int
 }
 
 // Pos 位置
 type Pos struct {
 	X, Y int32
+}
+
+// GameResultAck 对局结果
+type GameResultAck struct {
+	Id         int
+	ErrorCode  string
+	GameResult string
 }

@@ -43,8 +43,9 @@ func init() {
 					BlackId:       pair[1].OpenId,
 					CreateTime:    time.Now().Unix(),
 					ChessStepList: make([]PB.ChessStep, 0),
-					GobangInfo:    [15][15]string{},
+					GobangInfo:    [15][15]int{},
 					TurnId:        pair[0].OpenId,
+					GoBangTemp:    [15][15]*RoomSystem.Piece{},
 				}
 				delete(matchMap, pair[0].OpenId)
 				delete(matchMap, pair[1].OpenId)

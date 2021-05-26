@@ -72,9 +72,11 @@ Res ID : 1102
 
 Req ID:  1201
 
-| -   |     |      |
-| --- | --- | ---- |
-| id  | int | 1201 |
+| -         |     |      |          |
+| --------- | --- | ---- | -------- |
+| id        | int | 1201 |          |
+| matchType | int | 1    | 匹配     |
+|           |     | 2    | 取消匹配 |
 
 Res ID: 1202
 
@@ -87,8 +89,8 @@ Res ID: 1202
 |                |        | SUCCESS  | 匹配成功   |
 | enemyName      | string |          | 对手名字   |
 | enemyAvatarUrl | string |          | 对手头像   |
-| color          | string | RED      | 红方(先手) |
-|                |        | BLACK    | 黑方       |
+| color          | int    | 1        | 红方(先手) |
+|                |        | 2        | 黑方       |
 
 ```json
 {"id":1201}
@@ -101,17 +103,17 @@ Req ID: 1301
 | -    |      |      |
 | ---- | ---- | ---- |
 | id   | int  | 1301 |
-| steo | step |      |
+| step | step |      |
 
-step
+step 步信息
 
-| -     |        |
-| ----- | ------ |
-| pos   | pos    |
-| color | string |
+| -     |     |
+| ----- | --- |
+| pos   | pos |
+| color | int |
 
 
-pos
+pos 位置信息
 
 | -   |     |
 | --- | --- |
@@ -121,11 +123,26 @@ pos
 
 Res ID: 1302
 
-| -         |        |                   |
-| --------- | ------ | ----------------- |
-| id        | int    | 1302              |
-| errorCode | string |                   |
-| steps     | ste[]  | 数组 记录所有步数 |
+| -         |        |                 |
+| --------- | ------ | --------------- |
+| id        | int    | 1302            |
+| errorCode | string |                 |
+| steps     | step[] | 数组 记录所有步 |
+
+```json
+{"id":1301,"step":{"pos":{"x":6,"y":6},"color":"RED"}}
+```
+
+### 对局结果
+
+Res ID : 1402
+
+| -          |        |      |
+| ---------- | ------ | ---- |
+| id         | int    | 1402 |
+| errorCode  | string |      |
+| gameResult | string | WIN  |
+|            |        | LOSE |
 
 ## 流程图
 

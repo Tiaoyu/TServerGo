@@ -133,10 +133,15 @@ func handlerJson(ws *websocket.Conn, msg []byte) ([]byte, error) {
 		if room.TurnId != player.OpenId {
 			res, _ := json.Marshal(&PB.ChessStepAck{
 				Id:        0,
-				ErrorCode: "SUCCESS",
+				ErrorCode: "NOT YOUR TURN",
 				Steps:     room.ChessStepList,
 			})
 			return res, nil
+		}
+		if room.BlackId == player.OpenId {
+			req.Step.Color = PB.ColorTypeBlack
+		} else if room.RedId == player.OpenId {
+			req.Step.Color = PB.ColorTypeRed
 		}
 		room.MsgChannel <- req.Step
 	}
