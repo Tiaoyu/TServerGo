@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	matchPool = make(chan *MatchItem, 0)
-	matchMap  = make(map[string]struct{}, 0)
+	matchPool  = make(chan *MatchItem, 0)
+	cancelPool = make(chan *MatchItem, 0)
+	matchMap   = make(map[string]struct{}, 0)
 )
 
 type MatchItem struct {
@@ -26,7 +27,15 @@ func init() {
 			select {
 			case item := <-matchPool:
 				pair = append(pair, item)
+			case item := <-cancelPool:
+				for i, p := range pair {
+					if p.OpenId == item.OpenId {
+						pair = append(pair[:i], pair[i+1:]...)
+						break
+					}
+				}
 			}
+
 			// 只要匹配到两个就进行创建房间逻辑
 			if len(pair) == 2 {
 				room := &RoomSystem.Room{
@@ -46,6 +55,7 @@ func init() {
 	}()
 }
 
+// JoinMatch 加入匹配
 func JoinMatch(player *UserSystem.Player) {
 	if _, ok := matchMap[player.OpenId]; ok {
 		return
@@ -58,4 +68,14 @@ func JoinMatch(player *UserSystem.Player) {
 	matchMap[player.OpenId] = struct{}{}
 	matchPool <- item
 	log.Println(player.OpenId, " join to match.")
+}
+
+// CancelMatch 取消匹配
+func CancelMatch(player *UserSystem.Player) {
+	item := &MatchItem{
+		OpenId:     player.OpenId,
+		RemoteAddr: player.RemoteAddr,
+	}
+	cancelPool <- item
+	log.Println(player.OpenId, " cancel match.")
 }

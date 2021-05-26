@@ -104,7 +104,11 @@ func handlerJson(ws *websocket.Conn, msg []byte) ([]byte, error) {
 		if !ok {
 			return nil, nil
 		}
-		MatchSystem.JoinMatch(player)
+		if req.MatchType == PB.MatchTypeMatch {
+			MatchSystem.JoinMatch(player)
+		} else if req.MatchType == PB.MatchTypeCancel {
+			MatchSystem.CancelMatch(player)
+		}
 
 		res, err := json.Marshal(&PB.MatchAck{
 			Id:        1202,

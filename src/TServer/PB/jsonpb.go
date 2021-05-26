@@ -3,20 +3,20 @@ package PB
 // Ping PING
 type Ping struct {
 	Id        int
-	Timestamp int
+	Timestamp int // 时间戳
 }
 
 type Pong struct {
 	Id        int
-	Timestamp int
+	Timestamp int // 时间戳
 }
 
 // LoginReq 登陆
 type LoginReq struct {
 	Id        int
-	NickName  string
-	AvatarUrl string
-	Token     string
+	NickName  string // 昵称
+	AvatarUrl string // 头像
+	Token     string // jc_code
 }
 
 type LoginAck struct {
@@ -35,14 +35,20 @@ type WXLoginAck struct {
 
 // MatchReq 匹配
 type MatchReq struct {
-	Id int
+	Id        int
+	MatchType int
 }
+
+const (
+	MatchTypeMatch  = 1
+	MatchTypeCancel = 2
+)
 
 type MatchAck struct {
 	Id             int
 	ErrorCode      string
-	EnemyName      string
-	EnemyAvatarUrl string
+	EnemyName      string // 敌方阵营
+	EnemyAvatarUrl string // 敌方头像
 	Color          string // 阵营（红方、黑方）
 }
 
