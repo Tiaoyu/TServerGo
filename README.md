@@ -7,7 +7,7 @@ TServerGo
 
 想要做一个五子棋的小游戏， 后端用go实现， 前端用微信小游戏实现。
 
-前端微信小游戏实现传送门[https://github.com/MachineDream](https://github.com/MachineDream)
+前端微信小游戏实现传送门[https://github.com/MachineDream/tiaoyuGame](https://github.com/MachineDream/tiaoyuGame)
 
 ## 进度
 
