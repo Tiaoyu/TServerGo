@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	matchPool  = make(chan *MatchItem, 0)
-	cancelPool = make(chan *MatchItem, 0)
-	matchMap   = make(map[string]struct{}, 0)
+	matchPool  = make(chan *MatchItem, 0)     // 匹配池子
+	cancelPool = make(chan *MatchItem, 0)     // 取消匹配池子
+	matchMap   = make(map[string]struct{}, 0) // 在匹配中的
 )
 
 type MatchItem struct {
@@ -33,6 +33,14 @@ func init() {
 						pair = append(pair[:i], pair[i+1:]...)
 						break
 					}
+				}
+
+				// 返回取消匹配成功
+				if player := UserSystem.GetPlayerByOpenId(item.OpenId); player != nil {
+					player.SendChannel <- PB.ToJsonBytes(&PB.MatchAck{
+						Id:        1202,
+						ErrorCode: "CANCEL",
+					})
 				}
 			}
 

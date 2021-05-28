@@ -1,5 +1,13 @@
 package PB
 
+import "encoding/json"
+
+// ToJsonBytes 协议转json字节流
+func ToJsonBytes(v interface{}) []byte {
+	res, _ := json.Marshal(v)
+	return res
+}
+
 // Ping PING
 type Ping struct {
 	Id        int

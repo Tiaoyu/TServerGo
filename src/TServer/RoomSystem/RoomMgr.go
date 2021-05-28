@@ -49,7 +49,7 @@ func RoomLogic(room *Room) error {
 
 	//分别给红方、黑方发送对手 消息
 	res, _ := json.Marshal(&PB.MatchAck{
-		Id:             1302,
+		Id:             1202,
 		ErrorCode:      "SUCCESS",
 		EnemyName:      blackPlayer.NickName,
 		EnemyAvatarUrl: blackPlayer.AvatarUrl,
@@ -57,7 +57,7 @@ func RoomLogic(room *Room) error {
 	})
 	redPlayer.SendChannel <- res
 	res, _ = json.Marshal(&PB.MatchAck{
-		Id:             1302,
+		Id:             1202,
 		ErrorCode:      "SUCCESS",
 		EnemyName:      redPlayer.NickName,
 		EnemyAvatarUrl: redPlayer.AvatarUrl,
