@@ -30,15 +30,15 @@ Req ID:1001
 
 | -         | -   |            |
 | --------- | --- | ---------- |
-| id        | int | 1001       |
-| timestamp | int | 时间戳(秒) |
+| Id        | int | 1001       |
+| Timestamp | int | 时间戳(秒) |
 
 Res ID:1002
 
 | -         | -   |            |
 | --------- | --- | ---------- |
-| id        | int | 1002       |
-| timestamp | int | 时间戳(秒) |
+| Id        | int | 1002       |
+| Timestamp | int | 时间戳(秒) |
 
 
 ```json
@@ -51,18 +51,18 @@ Req ID : 1101
 
 | -         | -      | -       |
 | --------- | ------ | ------- |
-| id        | int    | 1101    |
-| nickName  | string | 昵称    |
-| avatarUrl | string | 头像    |
-| token     | string | js_code |
+| Id        | int    | 1101    |
+| NickName  | string | 昵称    |
+| AvatarUrl | string | 头像    |
+| Token     | string | js_code |
 
 Res ID : 1102
 
 | -         | -      | -        |
 | --------- | ------ | -------- |
-| id        | int    | 1101     |
-| errorCode | string | 错误信息 |
-| openId    | string |          |
+| Id        | int    | 1101     |
+| ErrorCode | string | 错误信息 |
+| OpenId    | string |          |
 
 ```json
 {"id": 1101,"nickName":"条鱼鱼丶炕","token":"0311lZ000MMFKL1qpI100iKyxo41lZ0s","avatarUrl":""}
@@ -74,26 +74,27 @@ Req ID:  1201
 
 | -         |     |      |          |
 | --------- | --- | ---- | -------- |
-| id        | int | 1201 |          |
-| matchType | int | 1    | 匹配     |
+| Id        | int | 1201 |          |
+| MatchType | int | 1    | 匹配     |
 |           |     | 2    | 取消匹配 |
 
 Res ID: 1202
 
 | -              |        |          |            |
 | -------------- | ------ | -------- | ---------- |
-| id             | int    | 1202     |            |
-| errorCode      | string | MATCHING | 正在匹配中 |
+| Id             | int    | 1202     |            |
+| ErrorCode      | string | MATCHING | 正在匹配中 |
 |                |        | FAILED   | 匹配失败   |
 |                |        | TIMEOUT  | 匹配超时   |
 |                |        | SUCCESS  | 匹配成功   |
-| enemyName      | string |          | 对手名字   |
-| enemyAvatarUrl | string |          | 对手头像   |
-| color          | int    | 1        | 红方(先手) |
+|                |        | CANCEL   | 取消成功   |
+| EnemyName      | string |          | 对手名字   |
+| EnemyAvatarUrl | string |          | 对手头像   |
+| Color          | int    | 1        | 红方(先手) |
 |                |        | 2        | 黑方       |
 
 ```json
-{"id":1201}
+{"id":1201,"matchType":1}
 ```
 
 ### 走棋
@@ -102,15 +103,15 @@ Req ID: 1301
 
 | -    |      |      |
 | ---- | ---- | ---- |
-| id   | int  | 1301 |
-| step | step |      |
+| Id   | int  | 1301 |
+| Step | step |      |
 
 step 步信息
 
 | -     |     |
 | ----- | --- |
-| pos   | pos |
-| color | int |
+| Pos   | pos |
+| Color | int |
 
 
 pos 位置信息
@@ -125,12 +126,12 @@ Res ID: 1302
 
 | -         |        |                 |
 | --------- | ------ | --------------- |
-| id        | int    | 1302            |
-| errorCode | string |                 |
-| steps     | step[] | 数组 记录所有步 |
+| Id        | int    | 1302            |
+| ErrorCode | string |                 |
+| Steps     | step[] | 数组 记录所有步 |
 
 ```json
-{"id":1301,"step":{"pos":{"x":6,"y":6},"color":"RED"}}
+{"id":1301,"step":{"pos":{"x":6,"y":6}}}
 ```
 
 ### 对局结果
@@ -139,9 +140,9 @@ Res ID : 1402
 
 | -          |        |      |
 | ---------- | ------ | ---- |
-| id         | int    | 1402 |
-| errorCode  | string |      |
-| gameResult | string | WIN  |
+| Id         | int    | 1402 |
+| ErrorCode  | string |      |
+| GameResult | string | WIN  |
 |            |        | LOSE |
 
 ## 流程图

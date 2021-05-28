@@ -74,8 +74,8 @@ func RoomLogic(room *Room) error {
 		for {
 			select {
 			case step := <-room.MsgChannel:
-				if isPosValid(room, step.Pos) {
-					log.Printf("%v step to an wront pos (%v)\n", step.Color, step.Pos)
+				if !isPosValid(room, step.Pos) {
+					log.Printf("%v step to an wrong pos (%v)\n", step.Color, step.Pos)
 					continue
 				}
 				log.Println(step.Color, " step to ", step.Pos)
