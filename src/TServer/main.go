@@ -6,6 +6,7 @@ import (
 	"TServer/RoomSystem"
 	"TServer/UserSystem"
 	"encoding/json"
+	"flag"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -23,9 +24,9 @@ var (
 	}
 )
 
-const (
-	SECRET = "5fb51181444d801fcc9aa42b44f86b57"
-	APP_ID = "wx76bf9a66a06b39c3"
+var (
+	SECRET = flag.String("SECRET", "", "please set SECRET")
+	APP_ID = flag.String("APP_ID", "", "please set APP_ID")
 )
 
 func hello(c echo.Context) error {
@@ -151,7 +152,7 @@ func handlerJson(ws *websocket.Conn, msg []byte) ([]byte, error) {
 
 func handlerGetWXLogin(token string) *PB.WXLoginAck {
 	res, err := http.Get("https://api.weixin.qq.com/sns/jscode2session?" +
-		"appid=" + APP_ID + "&secret=" + SECRET + "&js_code=" + token + "&grant_type=authorization_code")
+		"appid=" + *APP_ID + "&secret=" + *SECRET + "&js_code=" + token + "&grant_type=authorization_code")
 	if err != nil {
 		print(err)
 	}
@@ -166,6 +167,8 @@ func handlerGetWXLogin(token string) *PB.WXLoginAck {
 }
 
 func main() {
+	flag.Parse()
+
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
