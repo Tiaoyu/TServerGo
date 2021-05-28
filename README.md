@@ -1,27 +1,21 @@
-# TServerGo
+TServerGo
+=========
 
+[TOC]
 
 ## 目标
-想要做一个五子棋的小游戏，后端用go实现，前端用微信小游戏。因此通信协议应该就只能使用websocket了
 
-## TDL
+想要做一个五子棋的小游戏， 后端用go实现， 前端用微信小游戏实现。
 
-1. go实现websocket
-2. websocket+json协议交互
+前端微信小游戏实现传送门[https://github.com/MachineDream](https://github.com/MachineDream)
 
-## go labstack
+## 进度
 
-```
-go get github.com/labstack/echo/v4/middleware
-go get github.com/labstack/echo/v4
-```
+| -          | -                            |
+| ---------- | ---------------------------- |
+| 2021.05.29 | 前后端一个完整的匹配对局调通 |
 
-
-##
-1. 如何在Canvas里面放一张图片，
-2. 在Canvas放置一枚棋子，位置怎么确定
-
-## 功能
+## 功能协议
 
 ### PING
 
@@ -131,7 +125,7 @@ Res ID: 1302
 | Steps     | step[] | 数组 记录所有步 |
 
 ```json
-{"id":1301,"step":{"pos":{"x":6,"y":6}}}
+{"id":1301,"step":{"pos":{"x":6,"y":6},"color":1}}
 ```
 
 ### 对局结果
@@ -159,7 +153,7 @@ note over client,server : PING
 client ->> server : 登陆成功则5秒一次PING 1001
 server ->> client : PONG 1002
 
-note over client,serve : 匹配
+note over client,server : 匹配
 client ->> server : 发起匹配 1201
 server ->> server : 放入匹配池子
 server -->> client : 返回当前匹配状态 1202
@@ -170,10 +164,3 @@ client ->> server : 走一步
 server ->> server : 判断当前局势
 server ->> client : 推送给玩家局势信息
 ```
-
-## 协议
-
-加入t转成 byte数组后，数组长度为10
-t这个协议号是 1001，1001转成byte数组后，数组长度为4
-10 + 4 + 4 = 18
-[长度][协议号][协议本身]
