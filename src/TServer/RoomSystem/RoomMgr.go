@@ -81,6 +81,7 @@ func RoomLogic(room *Room) error {
 				log.Println(step.Color, " step to ", step.Pos)
 				room.GobangInfo[step.Pos.X][step.Pos.Y] = step.Color
 				room.ChessStepList = append(room.ChessStepList, step)
+				// 当前位置没人下过则创建一步棋
 				if temp := room.GoBangTemp[step.Pos.X][step.Pos.Y]; temp == nil {
 					temp = &Piece{
 						horizontal: 0,
@@ -90,15 +91,16 @@ func RoomLogic(room *Room) error {
 					}
 					if step.Color == PB.ColorTypeRed {
 						temp.openId = room.RedId
+						room.TurnId = room.BlackId
 					} else if step.Color == PB.ColorTypeBlack {
 						temp.openId = room.BlackId
+						room.TurnId = room.RedId
 					}
 					room.GoBangTemp[step.Pos.X][step.Pos.Y] = temp
 				}
 
 				// 更新棋盘数据
 				updateGobangTemp(room, step.Pos.X, step.Pos.Y)
-
 				res, _ := json.Marshal(&PB.ChessStepAck{
 					Id:        1302,
 					ErrorCode: "SUCCESS",
@@ -143,6 +145,9 @@ func RoomLogic(room *Room) error {
 func WhoWin(room *Room) (string, bool) {
 	for _, row := range room.GoBangTemp {
 		for _, col := range row {
+			if col == nil {
+				continue
+			}
 			if col.horizontal >= 5 || col.vertical >= 5 || col.lOblique >= 5 || col.rOblique >= 5 {
 				return col.openId, true
 			}
@@ -177,14 +182,14 @@ func updateGobangTemp(room *Room, x, y int32) {
 		arrPiece = append(arrPiece, curPiece)
 		// 1 相同的棋子全部取出来
 		for i := y - 1; i >= 0; i-- {
-			if t := room.GoBangTemp[x][i]; t.openId == curPiece.openId {
+			if t := room.GoBangTemp[x][i]; t != nil && t.openId == curPiece.openId {
 				arrPiece = append(arrPiece, t)
 			} else {
 				break
 			}
 		}
 		for i := y + 1; i < 15; i++ {
-			if t := room.GoBangTemp[x][i]; t.openId == curPiece.openId {
+			if t := room.GoBangTemp[x][i]; t != nil && t.openId == curPiece.openId {
 				arrPiece = append(arrPiece, t)
 			} else {
 				break
@@ -202,14 +207,14 @@ func updateGobangTemp(room *Room, x, y int32) {
 		arrPiece = append(arrPiece, curPiece)
 		// 1 相同的棋子全部取出来
 		for i := x - 1; i >= 0; i-- {
-			if t := room.GoBangTemp[i][y]; t.openId == curPiece.openId {
+			if t := room.GoBangTemp[i][y]; t != nil && t.openId == curPiece.openId {
 				arrPiece = append(arrPiece, t)
 			} else {
 				break
 			}
 		}
 		for i := x + 1; i < 15; i++ {
-			if t := room.GoBangTemp[i][y]; t.openId == curPiece.openId {
+			if t := room.GoBangTemp[i][y]; t != nil && t.openId == curPiece.openId {
 				arrPiece = append(arrPiece, t)
 			} else {
 				break
@@ -227,14 +232,14 @@ func updateGobangTemp(room *Room, x, y int32) {
 		arrPiece = append(arrPiece, curPiece)
 		// 1 相同的棋子全部取出来
 		for i, j := x-1, y-1; i >= 0 && j >= 0; i, j = i-1, j-1 {
-			if t := room.GoBangTemp[i][j]; t.openId == curPiece.openId {
+			if t := room.GoBangTemp[i][j]; t != nil && t.openId == curPiece.openId {
 				arrPiece = append(arrPiece, t)
 			} else {
 				break
 			}
 		}
 		for i, j := x+1, y+1; i < 15 && j < 15; i, j = i+1, j+1 {
-			if t := room.GoBangTemp[i][j]; t.openId == curPiece.openId {
+			if t := room.GoBangTemp[i][j]; t != nil && t.openId == curPiece.openId {
 				arrPiece = append(arrPiece, t)
 			} else {
 				break
@@ -252,14 +257,14 @@ func updateGobangTemp(room *Room, x, y int32) {
 		arrPiece = append(arrPiece, curPiece)
 		// 1 相同的棋子全部取出来
 		for i, j := x+1, y-1; i < 15 && j >= 0; i, j = i+1, j-1 {
-			if t := room.GoBangTemp[i][j]; t.openId == curPiece.openId {
+			if t := room.GoBangTemp[i][j]; t != nil && t.openId == curPiece.openId {
 				arrPiece = append(arrPiece, t)
 			} else {
 				break
 			}
 		}
 		for i, j := x-1, y+1; i >= 0 && j < 15; i, j = i-1, j+1 {
-			if t := room.GoBangTemp[i][j]; t.openId == curPiece.openId {
+			if t := room.GoBangTemp[i][j]; t != nil && t.openId == curPiece.openId {
 				arrPiece = append(arrPiece, t)
 			} else {
 				break
