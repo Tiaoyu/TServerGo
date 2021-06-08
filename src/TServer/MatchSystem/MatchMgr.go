@@ -1,6 +1,7 @@
 package MatchSystem
 
 import (
+	"TServer/NotifySystem"
 	"TServer/PB"
 	"TServer/RoomSystem"
 	"TServer/UserSystem"
@@ -62,6 +63,8 @@ func init() {
 			}
 		}
 	}()
+
+	NotifySystem.NotifyRegister(NotifySystem.NotifyTypeRoleLogout, PlayerLogout)
 }
 
 // JoinMatch 加入匹配
@@ -87,4 +90,18 @@ func CancelMatch(player *UserSystem.Player) {
 	}
 	cancelPool <- item
 	log.Println(player.OpenId, " cancel match.")
+}
+
+func CancelMatchById(openId, remoteAddr string) {
+	item := &MatchItem{
+		OpenId:     openId,
+		RemoteAddr: remoteAddr,
+	}
+	cancelPool <- item
+	log.Println(openId, " cancel match.")
+}
+
+func PlayerLogout(params ...interface{}) {
+	param := params[0].(NotifySystem.NotifyRoleLogoutParam)
+	CancelMatchById(param.OpenId, param.RemoteAddr)
 }

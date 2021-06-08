@@ -74,64 +74,68 @@ func RoomLogic(room *Room) error {
 		for {
 			select {
 			case step := <-room.MsgChannel:
-				if !isPosValid(room, step.Pos) {
-					log.Printf("%v step to an wrong pos (%v)\n", step.Color, step.Pos)
-					continue
-				}
-				log.Println(step.Color, " step to ", step.Pos)
-				room.GobangInfo[step.Pos.X][step.Pos.Y] = step.Color
-				room.ChessStepList = append(room.ChessStepList, step)
-				// 当前位置没人下过则创建一步棋
-				if temp := room.GoBangTemp[step.Pos.X][step.Pos.Y]; temp == nil {
-					temp = &Piece{
-						horizontal: 0,
-						vertical:   0,
-						lOblique:   0,
-						rOblique:   0,
+				{
+					if !isPosValid(room, step.Pos) {
+						log.Printf("%v step to an wrong pos (%v)\n", step.Color, step.Pos)
+						continue
 					}
-					if step.Color == PB.ColorTypeRed {
-						temp.openId = room.RedId
-						room.TurnId = room.BlackId
-					} else if step.Color == PB.ColorTypeBlack {
-						temp.openId = room.BlackId
-						room.TurnId = room.RedId
+					log.Println(step.Color, " step to ", step.Pos)
+					room.GobangInfo[step.Pos.X][step.Pos.Y] = step.Color
+					room.ChessStepList = append(room.ChessStepList, step)
+					// 当前位置没人下过则创建一步棋
+					if temp := room.GoBangTemp[step.Pos.X][step.Pos.Y]; temp == nil {
+						temp = &Piece{
+							horizontal: 0,
+							vertical:   0,
+							lOblique:   0,
+							rOblique:   0,
+						}
+						if step.Color == PB.ColorTypeRed {
+							temp.openId = room.RedId
+							room.TurnId = room.BlackId
+						} else if step.Color == PB.ColorTypeBlack {
+							temp.openId = room.BlackId
+							room.TurnId = room.RedId
+						}
+						room.GoBangTemp[step.Pos.X][step.Pos.Y] = temp
 					}
-					room.GoBangTemp[step.Pos.X][step.Pos.Y] = temp
-				}
 
-				// 更新棋盘数据
-				updateGobangTemp(room, step.Pos.X, step.Pos.Y)
-				res, _ := json.Marshal(&PB.ChessStepAck{
-					Id:        1302,
-					ErrorCode: "SUCCESS",
-					Steps:     room.ChessStepList,
-				})
-				UserSystem.GetPlayerByOpenId(room.RedId).SendChannel <- res
-				UserSystem.GetPlayerByOpenId(room.BlackId).SendChannel <- res
-			}
-			// 判断胜负
-			winId, isWin := WhoWin(room)
-			if isWin {
-				wRes, _ := json.Marshal(&PB.GameResultAck{
-					Id:         1402,
-					ErrorCode:  "SUCCESS",
-					GameResult: "WIN",
-				})
-				lRes, _ := json.Marshal(&PB.GameResultAck{
-					Id:         1402,
-					ErrorCode:  "SUCCESS",
-					GameResult: "LOSE",
-				})
+					// 更新棋盘数据
+					updateGobangTemp(room, step.Pos.X, step.Pos.Y)
+					res, _ := json.Marshal(&PB.ChessStepAck{
+						Id:        1302,
+						ErrorCode: "SUCCESS",
+						Steps:     room.ChessStepList,
+					})
+					UserSystem.GetPlayerByOpenId(room.RedId).SendChannel <- res
+					UserSystem.GetPlayerByOpenId(room.BlackId).SendChannel <- res
 
-				if winId == redPlayer.OpenId {
-					redPlayer.SendChannel <- wRes
-					blackPlayer.SendChannel <- lRes
-				} else if winId == blackPlayer.OpenId {
-					blackPlayer.SendChannel <- wRes
-					redPlayer.SendChannel <- lRes
+					// 判断胜负
+					winId, isWin := WhoWin(room)
+					if isWin {
+						wRes, _ := json.Marshal(&PB.GameResultAck{
+							Id:         1402,
+							ErrorCode:  "SUCCESS",
+							GameResult: "WIN",
+						})
+						lRes, _ := json.Marshal(&PB.GameResultAck{
+							Id:         1402,
+							ErrorCode:  "SUCCESS",
+							GameResult: "LOSE",
+						})
+
+						if winId == redPlayer.OpenId {
+							redPlayer.SendChannel <- wRes
+							blackPlayer.SendChannel <- lRes
+						} else if winId == blackPlayer.OpenId {
+							blackPlayer.SendChannel <- wRes
+							redPlayer.SendChannel <- lRes
+						}
+						break
+					}
 				}
-				break
 			}
+
 		}
 		delete(RoomOpenIdMap, room.RedId)
 		delete(RoomOpenIdMap, room.BlackId)
@@ -171,11 +175,11 @@ func isPosValid(room *Room, pos PB.Pos) bool {
 }
 
 // 更新对局辅助信息
-func updateGobangTemp(room *Room, x, y int32) {
+func updateGobangTemp(room *Room, x, y int32) (isWin bool) {
 	curPiece := room.GoBangTemp[x][y]
+	isWin = false
 
 	// 寻找当前位置的四个方向的所有piece 并更新每个方向的连珠数
-
 	arrPiece := make([]*Piece, 0)
 	// 横
 	{
@@ -195,10 +199,16 @@ func updateGobangTemp(room *Room, x, y int32) {
 				break
 			}
 		}
+
 		// 2 更新每个piece
 		for _, piece := range arrPiece {
 			piece.horizontal = len(arrPiece)
 		}
+
+	}
+
+	if len(arrPiece) >= 5 {
+		isWin = true
 	}
 
 	// 竖
@@ -225,7 +235,9 @@ func updateGobangTemp(room *Room, x, y int32) {
 			piece.vertical = len(arrPiece)
 		}
 	}
-
+	if len(arrPiece) >= 5 {
+		isWin = true
+	}
 	// 左斜
 	{
 		arrPiece = make([]*Piece, 0)
@@ -250,7 +262,9 @@ func updateGobangTemp(room *Room, x, y int32) {
 			piece.lOblique = len(arrPiece)
 		}
 	}
-
+	if len(arrPiece) >= 5 {
+		isWin = true
+	}
 	// 右斜
 	{
 		arrPiece = make([]*Piece, 0)
@@ -275,4 +289,9 @@ func updateGobangTemp(room *Room, x, y int32) {
 			piece.rOblique = len(arrPiece)
 		}
 	}
+	if len(arrPiece) >= 5 {
+		isWin = true
+	}
+
+	return isWin
 }

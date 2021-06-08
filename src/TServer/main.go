@@ -2,6 +2,7 @@ package main
 
 import (
 	"TServer/MatchSystem"
+	"TServer/NotifySystem"
 	"TServer/PB"
 	"TServer/RoomSystem"
 	"TServer/UserSystem"
@@ -47,6 +48,10 @@ func hello(c echo.Context) error {
 		if err != nil {
 			c.Logger().Error(err)
 			if msgType < 0 || err.(*websocket.CloseError).Code == 1005 {
+				NotifySystem.NotifyExec(NotifySystem.NotifyTypeRoleLogout, NotifySystem.NotifyRoleLogoutParam{
+					OpenId:     "",
+					RemoteAddr: ws.RemoteAddr().String(),
+				})
 				c.Logger().Error("client closed. RemoteAddr:", ws.RemoteAddr().String())
 				break
 			}
@@ -150,6 +155,7 @@ func handlerJson(ws *websocket.Conn, msg []byte) ([]byte, error) {
 	return nil, nil
 }
 
+// 微信平台账号验证
 func handlerGetWXLogin(token string) *PB.WXLoginAck {
 	res, err := http.Get("https://api.weixin.qq.com/sns/jscode2session?" +
 		"appid=" + *APP_ID + "&secret=" + *SECRET + "&js_code=" + token + "&grant_type=authorization_code")

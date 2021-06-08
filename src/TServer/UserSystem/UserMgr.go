@@ -1,6 +1,7 @@
 package UserSystem
 
 import (
+	"TServer/NotifySystem"
 	"github.com/gorilla/websocket"
 	"log"
 )
@@ -21,9 +22,17 @@ var (
 	PlayerRemoteMap = make(map[string]*Player)
 )
 
+func init() {
+	NotifySystem.NotifyRegister(NotifySystem.NotifyTypeRoleLogout, PlayerLogout)
+}
+
 func PlayerLogin(u *Player) {
 	PlayerRemoteMap[u.RemoteAddr] = u
 	PlayerOpenIdMap[u.OpenId] = u
+	NotifySystem.NotifyExec(NotifySystem.NotifyTypeRoleLoginIn, &NotifySystem.NotifyRoleLoginParam{
+		OpenId:     u.OpenId,
+		RemoteAddr: u.RemoteAddr,
+	})
 	go func() {
 		for {
 			select {
@@ -33,6 +42,16 @@ func PlayerLogin(u *Player) {
 		}
 	}()
 	log.Println(u.NickName, " login success, OpenId:", u.OpenId)
+}
+
+func PlayerLogout(params ...interface{}) {
+	param := params[0].(NotifySystem.NotifyRoleLogoutParam)
+	if tmp, ok := PlayerRemoteMap[param.RemoteAddr]; ok {
+		delete(PlayerRemoteMap, tmp.RemoteAddr)
+	}
+	if tmp, ok := PlayerRemoteMap[param.RemoteAddr]; ok {
+		delete(PlayerOpenIdMap, tmp.OpenId)
+	}
 }
 
 func GetPlayerByAddr(addr string) *Player {
