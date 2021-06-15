@@ -10,6 +10,7 @@ import (
 	"TServer/UserSystem"
 	"encoding/json"
 	"log"
+	"time"
 )
 
 type Room struct {
@@ -69,10 +70,19 @@ func RoomLogic(room *Room) error {
 	RoomOpenIdMap[room.RedId] = room
 	RoomOpenIdMap[room.BlackId] = room
 	room.MsgChannel = make(chan PB.ChessStep, 0)
-
+	room.CreateTime = time.Now().Unix()
 	go func() {
+		d := time.Duration(time.Second * 2)
+		t := time.NewTimer(d)
+		defer t.Stop()
 		for {
 			select {
+			case <-t.C:
+				t.Reset(time.Second * 2)
+				if time.Now().Unix()-room.CreateTime > 600 {
+					log.Printf("Room is time out, so it will be destroyed! Names:%v-%v", redPlayer.NickName, blackPlayer.NickName)
+				}
+				break
 			case step := <-room.MsgChannel:
 				{
 					if !isPosValid(room, step.Pos) {
