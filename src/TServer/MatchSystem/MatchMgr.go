@@ -46,7 +46,7 @@ func init() {
 			}
 
 			// 只要匹配到两个就进行创建房间逻辑
-			if len(pair) == 2 {
+			if len(pair) >= 2 {
 				room := &RoomSystem.Room{
 					RedId:         pair[0].OpenId,
 					BlackId:       pair[1].OpenId,
