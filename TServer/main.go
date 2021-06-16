@@ -1,11 +1,12 @@
 package main
 
 import (
-	"TServer/MatchSystem"
-	"TServer/NotifySystem"
-	"TServer/PB"
-	"TServer/RoomSystem"
-	"TServer/UserSystem"
+	"TServerGo/TServer/MatchSystem"
+	"TServerGo/TServer/NotifySystem"
+	"TServerGo/TServer/PB"
+	"TServerGo/TServer/RoomSystem"
+	"TServerGo/TServer/UserSystem"
+	"TServerGo/dbproxy"
 	"encoding/json"
 	"flag"
 	"github.com/google/uuid"
@@ -26,8 +27,10 @@ var (
 )
 
 var (
-	SECRET = flag.String("SECRET", "", "please set SECRET")
-	APP_ID = flag.String("APP_ID", "", "please set APP_ID")
+	Secret    = flag.String("SECRET", "", "please set SECRET")
+	AppId     = flag.String("APP_ID", "", "please set APP_ID")
+	Mysql     = flag.String("MYSQL", "", "please set mysql")
+	MysqlHost = flag.String("MYSQL_HOST", "", "please set mysql host")
 )
 
 func hello(c echo.Context) error {
@@ -158,7 +161,7 @@ func handlerJson(ws *websocket.Conn, msg []byte) ([]byte, error) {
 // 微信平台账号验证
 func handlerGetWXLogin(token string) *PB.WXLoginAck {
 	res, err := http.Get("https://api.weixin.qq.com/sns/jscode2session?" +
-		"appid=" + *APP_ID + "&secret=" + *SECRET + "&js_code=" + token + "&grant_type=authorization_code")
+		"appid=" + *AppId + "&secret=" + *Secret + "&js_code=" + token + "&grant_type=authorization_code")
 	if err != nil {
 		print(err)
 	}
@@ -175,6 +178,12 @@ func handlerGetWXLogin(token string) *PB.WXLoginAck {
 func main() {
 	flag.Parse()
 
+	// 数据库初始化
+	db := dbproxy.Instance()
+	db.Init(*Mysql, *MysqlHost)
+	db.Sync()
+
+	// http服务初始化
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

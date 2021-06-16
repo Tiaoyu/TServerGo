@@ -6,8 +6,8 @@
 package RoomSystem
 
 import (
-	"TServer/PB"
-	"TServer/UserSystem"
+	"TServerGo/TServer/PB"
+	"TServerGo/TServer/UserSystem"
 	"encoding/json"
 	"log"
 	"time"

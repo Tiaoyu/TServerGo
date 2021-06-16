@@ -1,10 +1,10 @@
 package MatchSystem
 
 import (
-	"TServer/NotifySystem"
-	"TServer/PB"
-	"TServer/RoomSystem"
-	"TServer/UserSystem"
+	"TServerGo/TServer/NotifySystem"
+	"TServerGo/TServer/PB"
+	"TServerGo/TServer/RoomSystem"
+	"TServerGo/TServer/UserSystem"
 	"log"
 	"time"
 )
