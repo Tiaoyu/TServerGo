@@ -28,6 +28,7 @@ func init() {
 			select {
 			case item := <-matchPool:
 				pair = append(pair, item)
+				log.Printf("Join match queue success! OpenId:%v\n", item.OpenId)
 			case item := <-cancelPool:
 				for i, p := range pair {
 					if p.OpenId == item.OpenId {
@@ -60,6 +61,7 @@ func init() {
 				delete(matchMap, pair[1].OpenId)
 				RoomSystem.RoomLogic(room)
 				pair = make([]*MatchItem, 0)
+				log.Printf("Match success! %v vs %v\n", room.RedId, room.BlackId)
 			}
 		}
 	}()
