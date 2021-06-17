@@ -4,8 +4,10 @@ import (
 	"TServerGo/TServer/NotifySystem"
 	"TServerGo/dbproxy"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
+
+	"github.com/go-xorm/xorm"
+	"github.com/gorilla/websocket"
 )
 
 // Player 玩家数据
@@ -35,21 +37,24 @@ func PlayerLogin(u *Player) {
 		OpenId:     u.OpenId,
 		RemoteAddr: u.RemoteAddr,
 	})
-	//TODO 登陆成功后 需要更新数据库
+	// 登陆成功后 需要更新数据库
 	user := &dbproxy.User{}
-	u.OpenId = "0311lZ000MMFKL1qpI100iKyxo41lZ0s"
 	has, err := dbproxy.Instance().Engine.Where("open_id=?", u.OpenId).Get(user)
-
-	if err != nil || !has {
-		user.UserName = u.NickName
-		user.OpenId = u.OpenId
-		dbproxy.Instance().Engine.Insert(user)
-	} else if has {
-		fmt.Println(user.Created)
-		user.UserName = u.NickName
-		user.OpenId = u.OpenId
-		dbproxy.Instance().Engine.Update(user)
-	}
+	dbproxy.Instance().Transaction(func(session *xorm.Session) (interface{}, error) {
+		if err != nil || !has {
+			user.UserName = u.NickName
+			user.OpenId = u.OpenId
+			res, err := session.Insert(user)
+			return res, err
+		} else if has {
+			fmt.Println(user.Created)
+			user.UserName = u.NickName
+			user.OpenId = u.OpenId
+			res, err := session.Update(user)
+			return res, err
+		}
+		return nil, nil
+	})
 
 	go func() {
 		for {

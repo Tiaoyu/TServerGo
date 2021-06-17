@@ -1,16 +1,15 @@
 package dbproxy
 
 import (
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
 	"log"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/xorm"
 )
 
 var (
-	driverName     = "mysql"
-	dataSourceName = "root:include@tcp(172.26.147.153:3306)/db?charset=utf8"
-	instance       *DBProxy
+	instance *DBProxy
 )
 
 type DBProxy struct {
@@ -36,10 +35,14 @@ func (db *DBProxy) Init(driverName, dataSourceName string) {
 	}
 	engine.SetTZLocation(time.UTC)
 	db.Engine = engine
+	log.Printf("dbproxy driver:%v, host:%v", db.DriverName, db.DataSourceName)
 }
 
 func (db *DBProxy) Sync() {
-	db.Engine.Sync2(new(User))
+	err := db.Engine.Sync2(new(User))
+	if err != nil {
+		log.Fatalf("dbproxy sync2 failed! Error:%v", err)
+	}
 	db.Engine.Sync2(new(Role))
 	db.Engine.Sync2(new(Race))
 }

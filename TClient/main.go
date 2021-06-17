@@ -50,6 +50,7 @@ func main() {
 
 	sendQueue := make(chan []byte)
 	go func() {
+		sendQueue <- []byte("{\"id\": 1101,\"nickName\":\"条鱼鱼丶炕\",\"token\":\"0311lZ000MMFKL1qpI100iKyxo41lZ0s\",\"avatarUrl\":\"\"}")
 		for {
 			reader := bufio.NewReader(os.Stdin)
 			fmt.Print("Enter text: ")
