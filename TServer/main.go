@@ -1,21 +1,24 @@
 package main
 
 import (
+	configs "TServerGo/TServer/Configs"
 	"TServerGo/TServer/MatchSystem"
 	"TServerGo/TServer/NotifySystem"
 	"TServerGo/TServer/PB"
+	pbhandler "TServerGo/TServer/PBHandler"
 	"TServerGo/TServer/RoomSystem"
 	"TServerGo/TServer/UserSystem"
 	"TServerGo/dbproxy"
 	"encoding/json"
 	"flag"
+	"io/ioutil"
+	"log"
+	"net/http"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"io/ioutil"
-	"log"
-	"net/http"
 )
 
 var (
@@ -59,7 +62,8 @@ func hello(c echo.Context) error {
 				break
 			}
 		}
-		handlerJson(ws, msg)
+		pbhandler.GetHandler("json").HandlerPB(ws, msg)
+		// handlerJson(ws, msg)
 		log.Printf("Recv %s\n", msg)
 	}
 	return nil
@@ -177,7 +181,8 @@ func handlerGetWXLogin(token string) *PB.WXLoginAck {
 
 func main() {
 	flag.Parse()
-
+	configs.Secret = *Secret
+	configs.AppId = *AppId
 	// 数据库初始化
 	db := dbproxy.Instance()
 	db.Init(*Mysql, *MysqlHost)
