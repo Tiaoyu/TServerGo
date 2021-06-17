@@ -5,7 +5,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
+	"xorm.io/xorm"
 )
 
 var (
@@ -39,11 +39,7 @@ func (db *DBProxy) Init(driverName, dataSourceName string) {
 }
 
 func (db *DBProxy) Sync() {
-	err := db.Engine.Sync2(new(User))
-	if err != nil {
-		log.Fatalf("dbproxy sync2 failed! Error:%v", err)
-	}
-	db.Engine.Sync2(new(Role))
+	db.Engine.Sync2(new(User))
 	db.Engine.Sync2(new(Race))
 }
 

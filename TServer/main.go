@@ -4,7 +4,7 @@ import (
 	configs "TServerGo/TServer/Configs"
 	"TServerGo/TServer/NotifySystem"
 	pbhandler "TServerGo/TServer/PBHandler"
-	"TServerGo/dbproxy"
+	"TServerGo/TServer/dbproxy"
 	"flag"
 	"log"
 	"net/http"

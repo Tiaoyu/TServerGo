@@ -2,12 +2,12 @@ package UserSystem
 
 import (
 	"TServerGo/TServer/NotifySystem"
-	"TServerGo/dbproxy"
+	"TServerGo/TServer/dbproxy"
 	"fmt"
 	"log"
 
-	"github.com/go-xorm/xorm"
 	"github.com/gorilla/websocket"
+	"xorm.io/xorm"
 )
 
 // Player 玩家数据

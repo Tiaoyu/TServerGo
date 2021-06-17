@@ -8,9 +8,12 @@ package RoomSystem
 import (
 	"TServerGo/TServer/PB"
 	"TServerGo/TServer/UserSystem"
+	"TServerGo/TServer/dbproxy"
 	"encoding/json"
 	"log"
 	"time"
+
+	"xorm.io/xorm"
 )
 
 type Room struct {
@@ -141,6 +144,34 @@ func RoomLogic(room *Room) error {
 							blackPlayer.SendChannel <- wRes
 							redPlayer.SendChannel <- lRes
 						}
+						// 存储胜负数据
+						dbproxy.Instance().Transaction(func(session *xorm.Session) (interface{}, error) {
+							rUser := &dbproxy.User{}
+							bUser := &dbproxy.User{}
+							session.Where("open_id = ?", redPlayer.OpenId).Get(rUser)
+							session.Where("open_id = ?", blackPlayer.OpenId).Get(bUser)
+							if winId == redPlayer.OpenId {
+								rUser.WinCount++
+								rUser.Score++
+								bUser.FailedCount++
+							} else if winId == blackPlayer.OpenId {
+								bUser.WinCount++
+								bUser.Score++
+								rUser.FailedCount++
+							}
+							session.Update(rUser)
+							session.Update(bUser)
+							race := &dbproxy.Race{
+								RedOpenId:   redPlayer.OpenId,
+								BlackOpenId: blackPlayer.OpenId,
+								WinnerId:    winId,
+							}
+
+							gobangInfo, _ := json.Marshal(room.ChessStepList)
+							race.GobangInfo = string(gobangInfo)
+							session.Insert(race)
+							return nil, nil
+						})
 						break
 					}
 				}
