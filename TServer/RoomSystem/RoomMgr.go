@@ -84,7 +84,7 @@ func RoomLogic(room *Room) error {
 			select {
 			case <-t.C:
 				t.Reset(time.Second * 2)
-				if time.Now().Unix()-room.CreateTime > 10 {
+				if time.Now().Unix()-room.CreateTime > 3600 {
 					log.Printf("Room is time out, so it will be destroyed! Names:%v-%v", redPlayer.NickName, blackPlayer.NickName)
 					finished = true
 				}
