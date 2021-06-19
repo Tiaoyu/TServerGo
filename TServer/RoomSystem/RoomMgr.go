@@ -130,9 +130,11 @@ func RoomLogic(room *Room) error {
 					})
 					if user := UserSystem.GetPlayerByOpenId(room.RedId); user != nil {
 						user.SendChannel <- res
+						redPlayer = user
 					}
 					if user := UserSystem.GetPlayerByOpenId(room.BlackId); user != nil {
 						user.SendChannel <- res
+						blackPlayer = user
 					}
 
 					// 判断胜负

@@ -40,8 +40,6 @@ func (h *HandlerJson) HandlerPB(ws *websocket.Conn, msg []byte) ([]byte, error) 
 			OpenId:    wxLogin.Openid,
 		})
 		if wxLogin.Openid == "" {
-			//uuid, _ := uuid.NewUUID()
-			//wxLogin.Openid = uuid.String()
 			wxLogin.Openid = req.Token
 		}
 		player := &UserSystem.Player{
@@ -89,10 +87,10 @@ func (h *HandlerJson) HandlerPB(ws *websocket.Conn, msg []byte) ([]byte, error) 
 			return nil, nil
 		}
 		value, ok := RoomSystem.RoomOpenIdMap.Load(player.OpenId)
-		room := value.(*RoomSystem.Room)
 		if !ok {
 			log.Println("room is nil, OpenId:", player.OpenId)
 		}
+		room := value.(*RoomSystem.Room)
 		if room.TurnId != player.OpenId {
 			res, _ := json.Marshal(&PB.ChessStepAck{
 				Id:        0,
