@@ -6,6 +6,7 @@
 package RoomSystem
 
 import (
+	"TServerGo/TServer/NotifySystem"
 	"TServerGo/TServer/PB"
 	"TServerGo/TServer/UserSystem"
 	"TServerGo/TServer/dbproxy"
@@ -39,6 +40,10 @@ type Piece struct {
 var (
 	RoomOpenIdMap = new(sync.Map)
 )
+
+func init() {
+	NotifySystem.NotifyRegister(NotifySystem.NotifyTypeRoleLoginIn, PlayerLogin)
+}
 
 // RoomLogic 房间逻辑
 func RoomLogic(room *Room) error {
@@ -123,8 +128,12 @@ func RoomLogic(room *Room) error {
 						ErrorCode: "SUCCESS",
 						Steps:     room.ChessStepList,
 					})
-					UserSystem.GetPlayerByOpenId(room.RedId).SendChannel <- res
-					UserSystem.GetPlayerByOpenId(room.BlackId).SendChannel <- res
+					if user := UserSystem.GetPlayerByOpenId(room.RedId); user != nil {
+						user.SendChannel <- res
+					}
+					if user := UserSystem.GetPlayerByOpenId(room.BlackId); user != nil {
+						user.SendChannel <- res
+					}
 
 					// 判断胜负
 					winId, isWin := WhoWin(room)
@@ -341,4 +350,18 @@ func updateGobangTemp(room *Room, x, y int32) (isWin bool) {
 	}
 
 	return isWin
+}
+
+func PlayerLogin(params ...interface{}) {
+	param := params[0].(NotifySystem.NotifyRoleLoginParam)
+	if room, ok := RoomOpenIdMap.Load(param.OpenId); ok {
+		if user := UserSystem.GetPlayerByOpenId(param.OpenId); user != nil {
+			res, _ := json.Marshal(&PB.ChessStepAck{
+				Id:        1302,
+				ErrorCode: "SUCCESS",
+				Steps:     room.(*Room).ChessStepList,
+			})
+			user.SendChannel <- res
+		}
+	}
 }

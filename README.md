@@ -158,6 +158,13 @@ server ->> WX_API : 验证登陆信息
 WX_API -->> server : 保存登陆结果
 server ->> server : 关联登陆玩家信息
 server -->> client : 登陆结果1102
+
+note over client,server : 断线重连
+client ->> server : 登陆1101
+server ->> server : 直接顶号 并关闭旧连接 若在对局内再发送当前局势数据
+server ->> client : 给玩家局势信息1302
+server ->> client : 登陆结果1102
+
 note over client,server : PING
 client ->> server : 登陆成功则5秒一次PING 1001
 server ->> client : PONG 1002
@@ -168,8 +175,8 @@ server ->> server : 放入匹配池子
 server -->> client : 返回当前匹配状态 1202
 server ->> client : 找到对手后返回匹配信息 1202
 
-note over client,server : 走棋
+note over client,server : 走棋1301
 client ->> server : 走一步
 server ->> server : 判断当前局势
-server ->> client : 推送给玩家局势信息
+server ->> client : 推送给玩家局势信息 1302
 ```

@@ -11,7 +11,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -41,8 +40,9 @@ func (h *HandlerJson) HandlerPB(ws *websocket.Conn, msg []byte) ([]byte, error) 
 			OpenId:    wxLogin.Openid,
 		})
 		if wxLogin.Openid == "" {
-			uuid, _ := uuid.NewUUID()
-			wxLogin.Openid = uuid.String()
+			//uuid, _ := uuid.NewUUID()
+			//wxLogin.Openid = uuid.String()
+			wxLogin.Openid = req.Token
 		}
 		player := &UserSystem.Player{
 			OpenId:      wxLogin.Openid,

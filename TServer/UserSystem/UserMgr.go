@@ -31,12 +31,16 @@ func init() {
 }
 
 func PlayerLogin(u *Player) {
-	PlayerRemoteMap[u.RemoteAddr] = u
-	PlayerOpenIdMap[u.OpenId] = u
-	NotifySystem.NotifyExec(NotifySystem.NotifyTypeRoleLoginIn, &NotifySystem.NotifyRoleLoginParam{
-		OpenId:     u.OpenId,
-		RemoteAddr: u.RemoteAddr,
-	})
+	if oldUser, ok := PlayerOpenIdMap[u.OpenId]; ok {
+		// 已有登陆角色直接顶号替换
+		PlayerOpenIdMap[oldUser.OpenId] = u
+		PlayerRemoteMap[u.RemoteAddr] = u
+		delete(PlayerRemoteMap, oldUser.RemoteAddr)
+		oldUser.Conn.Close()
+	} else {
+		PlayerOpenIdMap[u.OpenId] = u
+		PlayerRemoteMap[u.RemoteAddr] = u
+	}
 
 	fun := func(session *xorm.Session) (interface{}, error) {
 		user := &dbproxy.User{}
@@ -69,16 +73,22 @@ func PlayerLogin(u *Player) {
 			}
 		}
 	}()
+
 	log.Printf("%v login success, OpenId:%v RemoteAddr:%v", u.NickName, u.OpenId, u.RemoteAddr)
+
+	NotifySystem.NotifyExec(NotifySystem.NotifyTypeRoleLoginIn, NotifySystem.NotifyRoleLoginParam{
+		OpenId:     u.OpenId,
+		RemoteAddr: u.RemoteAddr,
+	})
 }
 
 func PlayerLogout(params ...interface{}) {
 	param := params[0].(NotifySystem.NotifyRoleLogoutParam)
 	if tmp, ok := PlayerRemoteMap[param.RemoteAddr]; ok {
 		delete(PlayerRemoteMap, tmp.RemoteAddr)
-	}
-	if tmp, ok := PlayerRemoteMap[param.RemoteAddr]; ok {
 		delete(PlayerOpenIdMap, tmp.OpenId)
+		tmp.Conn.Close()
+		log.Printf("Player closed. OpenId:%v RemoteAddr:%v NickName:%v", tmp.OpenId, tmp.RemoteAddr, tmp.NickName)
 	}
 }
 
