@@ -88,7 +88,8 @@ func (h *HandlerJson) HandlerPB(ws *websocket.Conn, msg []byte) ([]byte, error) 
 			log.Println("player is nil, RemoteAddr:", ws.RemoteAddr().String())
 			return nil, nil
 		}
-		room, ok := RoomSystem.RoomOpenIdMap[player.OpenId]
+		value, ok := RoomSystem.RoomOpenIdMap.Load(player.OpenId)
+		room := value.(*RoomSystem.Room)
 		if !ok {
 			log.Println("room is nil, OpenId:", player.OpenId)
 		}

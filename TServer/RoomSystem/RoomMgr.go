@@ -11,6 +11,7 @@ import (
 	"TServerGo/TServer/dbproxy"
 	"encoding/json"
 	"log"
+	"sync"
 	"time"
 
 	"xorm.io/xorm"
@@ -36,7 +37,7 @@ type Piece struct {
 }
 
 var (
-	RoomOpenIdMap = make(map[string]*Room)
+	RoomOpenIdMap = new(sync.Map)
 )
 
 // RoomLogic 房间逻辑
@@ -70,20 +71,22 @@ func RoomLogic(room *Room) error {
 	blackPlayer.SendChannel <- res
 
 	// 加入房间管理
-	RoomOpenIdMap[room.RedId] = room
-	RoomOpenIdMap[room.BlackId] = room
+	RoomOpenIdMap.Store(room.RedId, room)
+	RoomOpenIdMap.Store(room.BlackId, room)
 	room.MsgChannel = make(chan PB.ChessStep, 0)
 	room.CreateTime = time.Now().Unix()
 	go func() {
 		d := time.Duration(time.Second * 2)
 		t := time.NewTimer(d)
 		defer t.Stop()
+		var finished = false
 		for {
 			select {
 			case <-t.C:
 				t.Reset(time.Second * 2)
-				if time.Now().Unix()-room.CreateTime > 600 {
+				if time.Now().Unix()-room.CreateTime > 10 {
 					log.Printf("Room is time out, so it will be destroyed! Names:%v-%v", redPlayer.NickName, blackPlayer.NickName)
+					finished = true
 				}
 				break
 			case step := <-room.MsgChannel:
@@ -172,15 +175,18 @@ func RoomLogic(room *Room) error {
 							session.Insert(race)
 							return nil, nil
 						})
-						break
+						finished = true
 					}
 				}
+				break
 			}
-
+			if finished {
+				RoomOpenIdMap.Delete(room.RedId)
+				RoomOpenIdMap.Delete(room.BlackId)
+				log.Printf("room destroyed! Red:%v Black:%v\n", redPlayer.NickName, blackPlayer.NickName)
+				break
+			}
 		}
-		delete(RoomOpenIdMap, room.RedId)
-		delete(RoomOpenIdMap, room.BlackId)
-		log.Println("room destroyed!")
 	}()
 	log.Println("create room success, RedId:", room.RedId, " BlackId:", room.BlackId)
 	return nil

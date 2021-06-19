@@ -37,10 +37,10 @@ func PlayerLogin(u *Player) {
 		OpenId:     u.OpenId,
 		RemoteAddr: u.RemoteAddr,
 	})
-	// 登陆成功后 需要更新数据库
-	user := &dbproxy.User{}
-	has, err := dbproxy.Instance().Engine.Where("open_id=?", u.OpenId).Get(user)
-	dbproxy.Instance().Transaction(func(session *xorm.Session) (interface{}, error) {
+
+	fun := func(session *xorm.Session) (interface{}, error) {
+		user := &dbproxy.User{}
+		has, err := session.Where("open_id=?", u.OpenId).Get(user)
 		if err != nil || !has {
 			user.UserName = u.NickName
 			user.OpenId = u.OpenId
@@ -53,8 +53,13 @@ func PlayerLogin(u *Player) {
 			res, err := session.Update(user)
 			return res, err
 		}
-		return nil, nil
-	})
+		return nil, err
+	}
+	// 登陆成功后 需要更新数据库
+	_, err := dbproxy.Instance().Transaction(fun)
+	if err != nil {
+		log.Printf("Login failed! OpenId:%v NickName:%v Error:%v\n", u.OpenId, u.NickName, err)
+	}
 
 	go func() {
 		for {
@@ -64,7 +69,7 @@ func PlayerLogin(u *Player) {
 			}
 		}
 	}()
-	log.Println(u.NickName, " login success, OpenId:", u.OpenId)
+	log.Printf("%v login success, OpenId:%v RemoteAddr:%v", u.NickName, u.OpenId, u.RemoteAddr)
 }
 
 func PlayerLogout(params ...interface{}) {

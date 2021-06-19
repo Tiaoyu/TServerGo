@@ -2,8 +2,7 @@ package dbproxy
 
 // User 账号
 type User struct {
-	Id          int64
-	OpenId      string
+	OpenId      string `xorm:"pk"`
 	UserName    string
 	Score       uint32
 	WinCount    uint32

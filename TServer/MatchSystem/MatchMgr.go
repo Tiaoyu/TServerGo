@@ -6,13 +6,14 @@ import (
 	"TServerGo/TServer/RoomSystem"
 	"TServerGo/TServer/UserSystem"
 	"log"
+	"sync"
 	"time"
 )
 
 var (
-	matchPool  = make(chan *MatchItem, 0)     // 匹配池子
-	cancelPool = make(chan *MatchItem, 0)     // 取消匹配池子
-	matchMap   = make(map[string]struct{}, 0) // 在匹配中的
+	matchPool  = make(chan *MatchItem, 0) // 匹配池子
+	cancelPool = make(chan *MatchItem, 0) // 取消匹配池子
+	matchMap   = new(sync.Map)            // 在匹配中的
 )
 
 type MatchItem struct {
@@ -36,7 +37,7 @@ func init() {
 						break
 					}
 				}
-
+				matchMap.Delete(item.OpenId)
 				// 返回取消匹配成功
 				if player := UserSystem.GetPlayerByOpenId(item.OpenId); player != nil {
 					player.SendChannel <- PB.ToJsonBytes(&PB.MatchAck{
@@ -57,8 +58,8 @@ func init() {
 					TurnId:        pair[0].OpenId,
 					GoBangTemp:    [15][15]*RoomSystem.Piece{},
 				}
-				delete(matchMap, pair[0].OpenId)
-				delete(matchMap, pair[1].OpenId)
+				matchMap.Delete(pair[0].OpenId)
+				matchMap.Delete(pair[1].OpenId)
 				RoomSystem.RoomLogic(room)
 				pair = make([]*MatchItem, 0)
 				log.Printf("Match success! %v vs %v\n", room.RedId, room.BlackId)
@@ -71,7 +72,8 @@ func init() {
 
 // JoinMatch 加入匹配
 func JoinMatch(player *UserSystem.Player) {
-	if _, ok := matchMap[player.OpenId]; ok {
+	if _, ok := matchMap.Load(player.OpenId); ok {
+		log.Printf("%v already in mathing, so join match failed!", player.OpenId)
 		return
 	}
 
@@ -79,7 +81,7 @@ func JoinMatch(player *UserSystem.Player) {
 		OpenId:     player.OpenId,
 		RemoteAddr: player.RemoteAddr,
 	}
-	matchMap[player.OpenId] = struct{}{}
+
 	matchPool <- item
 	log.Println(player.OpenId, " join to match.")
 }
@@ -90,6 +92,7 @@ func CancelMatch(player *UserSystem.Player) {
 		OpenId:     player.OpenId,
 		RemoteAddr: player.RemoteAddr,
 	}
+
 	cancelPool <- item
 	log.Println(player.OpenId, " cancel match.")
 }
@@ -105,5 +108,7 @@ func CancelMatchById(openId, remoteAddr string) {
 
 func PlayerLogout(params ...interface{}) {
 	param := params[0].(NotifySystem.NotifyRoleLogoutParam)
-	CancelMatchById(param.OpenId, param.RemoteAddr)
+	if _, ok := matchMap.Load(param.OpenId); ok {
+		CancelMatchById(param.OpenId, param.RemoteAddr)
+	}
 }
