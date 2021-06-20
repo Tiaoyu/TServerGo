@@ -167,14 +167,16 @@ func RoomLogic(room *Room) error {
 							if winId == redPlayer.OpenId {
 								rUser.WinCount++
 								rUser.Score++
+								bUser.Score--
 								bUser.FailedCount++
 							} else if winId == blackPlayer.OpenId {
 								bUser.WinCount++
 								bUser.Score++
+								rUser.Score--
 								rUser.FailedCount++
 							}
-							session.Update(rUser)
-							session.Update(bUser)
+							session.Where("open_id = ?", redPlayer.OpenId).Update(rUser)
+							session.Where("open_id = ?", blackPlayer.OpenId).Update(bUser)
 							race := &dbproxy.Race{
 								RedOpenId:   redPlayer.OpenId,
 								BlackOpenId: blackPlayer.OpenId,

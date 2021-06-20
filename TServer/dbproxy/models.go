@@ -4,7 +4,7 @@ package dbproxy
 type User struct {
 	OpenId      string `xorm:"pk"`
 	UserName    string
-	Score       uint32
+	Score       int32
 	WinCount    uint32
 	FailedCount uint32
 	Created     int64 `xorm:"created"`
