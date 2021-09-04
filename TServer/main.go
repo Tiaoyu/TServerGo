@@ -55,7 +55,7 @@ func hello(c echo.Context) error {
 				break
 			}
 		}
-		pbhandler.GetHandler("json").HandlerPB(ws, msg)
+		pbhandler.GetHandler("json").HandlerPB(&pbhandler.ConnectInfo{WS: ws}, msg)
 		// handlerJson(ws, msg)
 		log.Printf("Recv %s\n", msg)
 	}

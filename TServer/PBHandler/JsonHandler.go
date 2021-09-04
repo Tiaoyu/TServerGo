@@ -10,14 +10,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/websocket"
 )
 
 type HandlerJson struct {
 }
 
-func (h *HandlerJson) HandlerPB(ws *websocket.Conn, msg []byte) ([]byte, error) {
+func (h *HandlerJson) HandlerPB(conn *ConnectInfo, msg []byte) ([]byte, error) {
 	m := make(map[string]int)
 	json.Unmarshal(msg, &m)
 	switch m["id"] {
@@ -25,7 +23,7 @@ func (h *HandlerJson) HandlerPB(ws *websocket.Conn, msg []byte) ([]byte, error) 
 		req := &PB.Pong{}
 		json.Unmarshal(msg, &req)
 		res, err := json.Marshal(&PB.Pong{Id: 1002, Timestamp: req.Timestamp})
-		UserSystem.GetPlayerByAddr(ws.RemoteAddr().String()).SendChannel <- res
+		UserSystem.GetPlayerByAddr(conn.WS.RemoteAddr().String()).SendChannel <- res
 		return res, err
 	case 1101: // 登陆
 		req := &PB.LoginReq{}
@@ -46,10 +44,10 @@ func (h *HandlerJson) HandlerPB(ws *websocket.Conn, msg []byte) ([]byte, error) 
 			OpenId:      wxLogin.Openid,
 			NickName:    req.NickName,
 			AvatarUrl:   req.AvatarUrl,
-			RemoteAddr:  ws.RemoteAddr().String(),
+			RemoteAddr:  conn.WS.RemoteAddr().String(),
 			SessionKey:  wxLogin.Session_key,
 			SendChannel: make(chan []byte),
-			Conn:        ws,
+			Conn:        conn.WS,
 		}
 		UserSystem.PlayerLogin(player)
 		player.SendChannel <- res
@@ -60,7 +58,7 @@ func (h *HandlerJson) HandlerPB(ws *websocket.Conn, msg []byte) ([]byte, error) 
 		if err != nil {
 			return nil, nil
 		}
-		player, ok := UserSystem.PlayerRemoteMap[ws.RemoteAddr().String()]
+		player, ok := UserSystem.PlayerRemoteMap[conn.WS.RemoteAddr().String()]
 		if !ok {
 			return nil, nil
 		}
@@ -81,9 +79,9 @@ func (h *HandlerJson) HandlerPB(ws *websocket.Conn, msg []byte) ([]byte, error) 
 		if err != nil {
 			return nil, nil
 		}
-		player, ok := UserSystem.PlayerRemoteMap[ws.RemoteAddr().String()]
+		player, ok := UserSystem.PlayerRemoteMap[conn.WS.RemoteAddr().String()]
 		if !ok {
-			log.Println("player is nil, RemoteAddr:", ws.RemoteAddr().String())
+			log.Println("player is nil, RemoteAddr:", conn.WS.RemoteAddr().String())
 			return nil, nil
 		}
 		value, ok := RoomSystem.RoomOpenIdMap.Load(player.OpenId)
