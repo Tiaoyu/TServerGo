@@ -1,21 +1,31 @@
 package main
 
 import (
+	logger "TServerGo/Log"
+	"TServerGo/TServer/PB"
 	"bufio"
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/url"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"google.golang.org/protobuf/proto"
 )
 
 var addr = flag.String("addr", "localhost:8081", "http service address")
 
 func main() {
+	logger.Init("client", logger.LogLevelDEBUG|logger.LogLevelERROR)
+	//websocketClient()
+
+	socketClient()
+}
+func websocketClient() {
 	flag.Parse()
 	log.SetFlags(0)
 
@@ -148,5 +158,36 @@ func main() {
 			}
 			return
 		}
+	}
+}
+
+func socketClient() {
+	conn, err := net.Dial("tcp", "localhost:8081")
+	if err != nil {
+		// handle error
+		logger.Errorf("net error, err:%v", err)
+		return
+	}
+	defer conn.Close()
+	ticker := time.NewTicker(5 * time.Second)
+	for {
+		select {
+		case t := <-ticker.C:
+			logger.Debugf("Current time:%v", t.Format(time.RFC3339))
+			msg, _ := proto.Marshal(&PB.C2SPing{
+				Time: time.Now().Unix(),
+			})
+			logger.Debugf("Send msg:%v", msg)
+			conn.Write(msg)
+		}
+		var msg = make([]byte, 1024)
+		len, err := conn.Read(msg)
+		if err != nil || len == 0 {
+			logger.Errorf("net error, err:%v")
+			break
+		}
+		ack := &PB.S2CPong{}
+		proto.Unmarshal(msg[:len], ack)
+		logger.Debugf("Recv, msg:%v", ack)
 	}
 }

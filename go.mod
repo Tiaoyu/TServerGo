@@ -12,6 +12,7 @@ require (
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/labstack/echo/v4 v4.3.0
 	google.golang.org/grpc v1.38.0
-	google.golang.org/protobuf v1.26.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0 // indirect
+	google.golang.org/protobuf v1.27.1
 	xorm.io/xorm v1.1.0
 )

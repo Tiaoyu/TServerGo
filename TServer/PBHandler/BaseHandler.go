@@ -8,6 +8,8 @@ func GetHandler(name string) PBHandler {
 	switch name {
 	case "json":
 		return new(HandlerJson)
+	case "pb":
+		return new(HandlerProtobuf)
 	default:
 		return new(HandlerJson)
 	}

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "tiaoyuyu.com/TServer/PB";
+package PB;
+
+message C2SPing {
+	int64 time = 1;
+}
+message S2CPong {
+	int64 time = 1;
+}

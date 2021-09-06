@@ -1,12 +1,14 @@
 package main
 
 import (
+	logger "TServerGo/Log"
 	configs "TServerGo/TServer/Configs"
 	"TServerGo/TServer/NotifySystem"
 	pbhandler "TServerGo/TServer/PBHandler"
 	"TServerGo/TServer/dbproxy"
 	"flag"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -23,10 +25,11 @@ var (
 )
 
 var (
-	Secret    = flag.String("SECRET", "", "please set SECRET")
-	AppId     = flag.String("APP_ID", "", "please set APP_ID")
-	Mysql     = flag.String("MYSQL", "", "please set mysql")
-	MysqlHost = flag.String("MYSQL_HOST", "", "please set mysql host")
+	Secret      = flag.String("SECRET", "", "please set SECRET")
+	AppId       = flag.String("APP_ID", "", "please set APP_ID")
+	Mysql       = flag.String("MYSQL", "", "please set mysql")
+	MysqlHost   = flag.String("MYSQL_HOST", "", "please set mysql host")
+	IsWebsocket = flag.Bool("IS_WEBSOCKET", true, "please set net type")
 )
 
 func hello(c echo.Context) error {
@@ -63,6 +66,7 @@ func hello(c echo.Context) error {
 }
 
 func main() {
+	logger.Init("TServer", logger.LogLevelDEBUG|logger.LogLevelINFO|logger.LogLevelWARN|logger.LogLevelERROR)
 	flag.Parse()
 	configs.Secret = *Secret
 	configs.AppId = *AppId
@@ -72,9 +76,39 @@ func main() {
 	db.Sync()
 
 	// http服务初始化
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.GET("/ws", hello)
-	e.Logger.Fatal(e.Start(":8081"))
+	if *IsWebsocket {
+		e := echo.New()
+		e.Use(middleware.Logger())
+		e.Use(middleware.Recover())
+		e.GET("/ws", hello)
+		e.Logger.Fatal(e.Start(":8081"))
+	}
+	// tcp服务初始化
+	logger.Debug("init tcp...")
+	ln, err := net.Listen("tcp", ":8081")
+	if err != nil {
+		logger.Errorf("net error, err: %v", err)
+		return
+	}
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			logger.Errorf("net error, err: %v", err)
+		}
+		go handlerConnect(conn)
+	}
+}
+
+func handlerConnect(conn net.Conn) {
+	defer conn.Close()
+	logger.Debugf("Connected, Addr:%v", conn.RemoteAddr())
+	for {
+		var msg = make([]byte, 1024)
+		len, err := conn.Read(msg)
+		if err != nil || len == 0 {
+			logger.Errorf("net error, err:%v", err)
+			break
+		}
+		pbhandler.GetHandler("pb").HandlerPB(&pbhandler.ConnectInfo{SOCKET: conn}, msg[:len])
+	}
 }
