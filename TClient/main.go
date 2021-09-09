@@ -4,6 +4,7 @@ import (
 	logger "TServerGo/Log"
 	"TServerGo/TServer/PB"
 	"bufio"
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"log"
@@ -178,6 +179,14 @@ func socketClient() {
 				Time: time.Now().Unix(),
 			})
 			logger.Debugf("Send msg:%v", msg)
+			buf1 := make([]byte, 4)
+			binary.BigEndian.PutUint32(buf1, uint32(len(msg)+4))
+			logger.Debugf("%v", len(msg)+4)
+			buf2 := make([]byte, 4)
+			binary.BigEndian.PutUint32(buf2, uint32(PB.Gamepb_ping))
+			logger.Debugf("%v", uint32(PB.Gamepb_ping))
+			msg = append(buf1, append(buf2, msg...)...)
+			logger.Debugf("===%x", msg)
 			conn.Write(msg)
 		}
 		var msg = make([]byte, 1024)

@@ -102,6 +102,13 @@ func main() {
 func handlerConnect(conn net.Conn) {
 	defer conn.Close()
 	logger.Debugf("Connected, Addr:%v", conn.RemoteAddr())
+	connMap := make(map[string]*pbhandler.ConnectInfo)
+	connectInfo, ok := connMap[conn.RemoteAddr().String()]
+	if !ok {
+		connectInfo = &pbhandler.ConnectInfo{
+			SOCKET: conn,
+		}
+	}
 	for {
 		var msg = make([]byte, 1024)
 		len, err := conn.Read(msg)
@@ -109,6 +116,7 @@ func handlerConnect(conn net.Conn) {
 			logger.Errorf("net error, err:%v", err)
 			break
 		}
-		pbhandler.GetHandler("pb").HandlerPB(&pbhandler.ConnectInfo{SOCKET: conn}, msg[:len])
+		logger.Debugf("Recv msg, len:%v msg:%v", len, msg[:len])
+		pbhandler.GetHandler("pb").HandlerPB(connectInfo, msg[:len])
 	}
 }

@@ -4,6 +4,7 @@ type PBHandler interface {
 	HandlerPB(conn *ConnectInfo, msg []byte) ([]byte, error)
 }
 
+// 获取消息处理handler
 func GetHandler(name string) PBHandler {
 	switch name {
 	case "json":

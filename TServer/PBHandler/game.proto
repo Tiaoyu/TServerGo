@@ -1,7 +1,16 @@
 syntax = "proto3";
 
+import "google/protobuf/descriptor.proto";
 option go_package = "tiaoyuyu.com/TServer/PB";
 package PB;
+extend google.protobuf.EnumValueOptions {
+	string c2s = 1000;
+	string s2c = 1001;
+}
+
+enum gamepb {
+	ping = 0[(c2s)="C2SPing",(s2c)="S2CPong"];
+}
 
 message C2SPing {
 	int64 time = 1;
