@@ -2,7 +2,7 @@ package main
 
 import (
 	logger "TServerGo/Log"
-	"TServerGo/TServer/PB"
+	"TServerGo/pb"
 	"bufio"
 	"encoding/binary"
 	"flag"
@@ -175,16 +175,16 @@ func socketClient() {
 		select {
 		case t := <-ticker.C:
 			logger.Debugf("Current time:%v", t.Format(time.RFC3339))
-			msg, _ := proto.Marshal(&PB.C2SPing{
-				Time: time.Now().Unix(),
+			msg, _ := proto.Marshal(&gamepb.C2SPing{
+				Timestamp: time.Now().Unix(),
 			})
 			logger.Debugf("Send msg:%v", msg)
 			buf1 := make([]byte, 4)
 			binary.BigEndian.PutUint32(buf1, uint32(len(msg)+4))
 			logger.Debugf("%v", len(msg)+4)
 			buf2 := make([]byte, 4)
-			binary.BigEndian.PutUint32(buf2, uint32(PB.Gamepb_ping))
-			logger.Debugf("%v", uint32(PB.Gamepb_ping))
+			binary.BigEndian.PutUint32(buf2, uint32(gamepb.ProtocolType_EC2SPing))
+			logger.Debugf("%v", uint32(gamepb.ProtocolType_EC2SPing))
 			msg = append(buf1, append(buf2, msg...)...)
 			logger.Debugf("===%x", msg)
 			conn.Write(msg)
@@ -195,7 +195,7 @@ func socketClient() {
 			logger.Errorf("net error, err:%v")
 			break
 		}
-		ack := &PB.S2CPong{}
+		ack := &gamepb.S2CPing{}
 		proto.Unmarshal(msg[:len], ack)
 		logger.Debugf("Recv, msg:%v", ack)
 	}

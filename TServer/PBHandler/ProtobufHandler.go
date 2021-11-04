@@ -2,7 +2,7 @@ package pbhandler
 
 import (
 	logger "TServerGo/Log"
-	"TServerGo/TServer/PB"
+	"TServerGo/pb"
 	"encoding/binary"
 	"log"
 
@@ -10,12 +10,12 @@ import (
 )
 
 var (
-	pbMap map[PB.Gamepb]func(msg []byte) ([]byte, error)
+	pbMap map[gamepb.ProtocolType]func(msg []byte) ([]byte, uint32, error)
 )
 
 func init() {
-	pbMap = make(map[PB.Gamepb]func(msg []byte) ([]byte, error))
-	pbMap[PB.Gamepb_ping] = OnPing
+	pbMap = make(map[gamepb.ProtocolType]func(msg []byte) ([]byte, uint32, error))
+	pbMap[gamepb.ProtocolType_EC2SPing] = OnPing
 }
 
 type HandlerProtobuf struct {
@@ -64,20 +64,34 @@ func (h *HandlerProtobuf) HandlerPB(ws *ConnectInfo, msg []byte) ([]byte, error)
 	// 反序列化协议
 	{
 		protoId := binary.BigEndian.Uint32(ws.MsgContent[:4])
-		ack, _ := pbMap[PB.Gamepb(protoId)](ws.MsgContent[4:])
+		call, ok := pbMap[gamepb.ProtocolType(protoId)]
+		if !ok {
+			ws.Clear()
+			return nil, nil
+		}
+		ack, ackPId, _ := call(ws.MsgContent[4:])
+
 		ws.Clear()
 
-		ws.SOCKET.Write(ack) // todo 放到写协程中处理
+		var bufHead = make([]byte, 4)
+		var bufPId = make([]byte, 4)
+		binary.BigEndian.PutUint32(bufPId, ackPId)
+		binary.BigEndian.PutUint32(bufHead, uint32(len(ack)+4))
+		bufHead = append(bufHead, bufPId...)
+		bufHead = append(bufHead, ack...)
+		ws.SOCKET.Write(bufHead) // todo 放到写协程中处理
 	}
 	return nil, nil
 }
-func OnPing(msg []byte) ([]byte, error) {
+func OnPing(msg []byte) ([]byte, uint32, error) {
 	logger.Debugf("Recv msg bytes:%v", msg)
-	p := &PB.C2SPing{}
+	p := &gamepb.C2SPing{}
 	if err := proto.Unmarshal(msg, p); err != nil {
 		log.Fatalln("Failed to parse C2SPing:", err)
 	}
 	logger.Debugf("Recv msg:%v", p)
-	ack, _ := proto.Marshal(&PB.S2CPong{Time: p.Time})
-	return ack, nil
+
+	ack, _ := proto.Marshal(&gamepb.S2CPing{Timestamp: p.Timestamp})
+
+	return ack, uint32(gamepb.ProtocolType_ES2CPing), nil
 }

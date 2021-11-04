@@ -9,7 +9,7 @@ package gamepb;
 
 enum ProtocolType {
     EC2SPing = 0;
-    ES2CPING = 1;
+    ES2CPing = 1;
     EC2SGobangStep = 2;
     ES2CGobangStep = 3;
 }

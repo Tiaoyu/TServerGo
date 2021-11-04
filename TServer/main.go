@@ -85,7 +85,7 @@ func main() {
 	}
 	// tcp服务初始化
 	logger.Debug("init tcp...")
-	ln, err := net.Listen("tcp", ":8081")
+	ln, err := net.Listen("tcp", "127.0.0.1:8081")
 	if err != nil {
 		logger.Errorf("net error, err: %v", err)
 		return

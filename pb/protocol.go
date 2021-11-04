@@ -15,7 +15,7 @@ var (
 func init() {
 	ProtocolTypeMap = make(map[reflect.Type]ProtocolType, 0)
 	ProtocolTypeMap[reflect.TypeOf(C2SPing{})] = ProtocolType_EC2SPing
-	ProtocolTypeMap[reflect.TypeOf(S2CPing{})] = ProtocolType_ES2CPING
+	ProtocolTypeMap[reflect.TypeOf(S2CPing{})] = ProtocolType_ES2CPing
 	ProtocolTypeMap[reflect.TypeOf(C2SGobangStep{})] = ProtocolType_EC2SGobangStep
 	ProtocolTypeMap[reflect.TypeOf(S2CGobangStep{})] = ProtocolType_ES2CGobangStep
 
