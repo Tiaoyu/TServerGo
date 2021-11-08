@@ -7,9 +7,37 @@ option java_outer_classname = "gamepb";
 
 package gamepb;
 
+// 协议类型
 enum ProtocolType {
     EC2SPing = 0;
     ES2CPing = 1;
-    EC2SGobangStep = 2;
-    ES2CGobangStep = 3;
+    EC2SLogin = 2;
+    ES2CLogin = 3;
+    EC2SMatch = 4;
+    ES2CMatch = 5;
+    EC2SStep = 6;
+    ES2CStep = 7;
+
+}
+
+// 匹配类型
+enum MatchType {
+    MatchTypeDefault = 0;
+    MatchTypeMatch = 1;
+    MatchTypeCancel = 2;
+}
+
+// 匹配结果
+enum MatchResult {
+    MatResultDefault = 0;
+    MatResultSuccess = 1;
+    MatResultFailed = 2;
+    MatResultMatching = 3;
+}
+
+// 对局双方类型
+enum ColorType {
+    ColorTypeDefault = 0;
+    ColorTypeRed = 1; // 红方
+    ColorTypeBlack = 2; // 黑方
 }

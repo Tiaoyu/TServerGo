@@ -109,6 +109,7 @@ func handlerConnect(conn net.Conn) {
 			SOCKET: conn,
 		}
 	}
+	handler := pbhandler.GetHandler("pb")
 	for {
 		var msg = make([]byte, 1024)
 		len, err := conn.Read(msg)
@@ -117,6 +118,6 @@ func handlerConnect(conn net.Conn) {
 			break
 		}
 		logger.Debugf("Recv msg, len:%v msg:%v", len, msg[:len])
-		pbhandler.GetHandler("pb").HandlerPB(connectInfo, msg[:len])
+		handler.HandlerPB(connectInfo, msg[:len])
 	}
 }

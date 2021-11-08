@@ -2,11 +2,11 @@ package UserSystem
 
 import (
 	"TServerGo/TServer/NotifySystem"
+	"TServerGo/TServer/Sessionx"
 	"TServerGo/TServer/dbproxy"
 	"fmt"
-	"log"
-
 	"github.com/gorilla/websocket"
+	"log"
 	"xorm.io/xorm"
 )
 
@@ -19,6 +19,7 @@ type Player struct {
 	SessionKey  string
 	SendChannel chan []byte
 	Conn        *websocket.Conn
+	Sess        *Sessionx.Session
 }
 
 var (
@@ -36,7 +37,7 @@ func PlayerLogin(u *Player) {
 		PlayerOpenIdMap[oldUser.OpenId] = u
 		PlayerRemoteMap[u.RemoteAddr] = u
 		delete(PlayerRemoteMap, oldUser.RemoteAddr)
-		oldUser.Conn.Close()
+		oldUser.Sess.Close()
 	} else {
 		PlayerOpenIdMap[u.OpenId] = u
 		PlayerRemoteMap[u.RemoteAddr] = u

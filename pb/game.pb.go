@@ -20,157 +20,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// The request message containing the user's name.
-type HelloRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-}
-
-func (x *HelloRequest) Reset() {
-	*x = HelloRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *HelloRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*HelloRequest) ProtoMessage() {}
-
-func (x *HelloRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use HelloRequest.ProtoReflect.Descriptor instead.
-func (*HelloRequest) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *HelloRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-// The response message containing the greetings
-type HelloReply struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-}
-
-func (x *HelloReply) Reset() {
-	*x = HelloReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *HelloReply) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*HelloReply) ProtoMessage() {}
-
-func (x *HelloReply) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[1]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use HelloReply.ProtoReflect.Descriptor instead.
-func (*HelloReply) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *HelloReply) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-type RouteNote struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Location *Point `protobuf:"bytes,1,opt,name=location,proto3" json:"location,omitempty"`
-	Message  string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-}
-
-func (x *RouteNote) Reset() {
-	*x = RouteNote{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *RouteNote) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RouteNote) ProtoMessage() {}
-
-func (x *RouteNote) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RouteNote.ProtoReflect.Descriptor instead.
-func (*RouteNote) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *RouteNote) GetLocation() *Point {
-	if x != nil {
-		return x.Location
-	}
-	return nil
-}
-
-func (x *RouteNote) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 type Error struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -183,7 +32,7 @@ type Error struct {
 func (x *Error) Reset() {
 	*x = Error{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[3]
+		mi := &file_game_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -196,7 +45,7 @@ func (x *Error) String() string {
 func (*Error) ProtoMessage() {}
 
 func (x *Error) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[3]
+	mi := &file_game_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -209,7 +58,7 @@ func (x *Error) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Error.ProtoReflect.Descriptor instead.
 func (*Error) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{3}
+	return file_game_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Error) GetErrorCode() ErrorType {
@@ -240,7 +89,7 @@ type Point struct {
 func (x *Point) Reset() {
 	*x = Point{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[4]
+		mi := &file_game_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -253,7 +102,7 @@ func (x *Point) String() string {
 func (*Point) ProtoMessage() {}
 
 func (x *Point) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[4]
+	mi := &file_game_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -266,7 +115,7 @@ func (x *Point) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Point.ProtoReflect.Descriptor instead.
 func (*Point) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{4}
+	return file_game_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Point) GetX() int32 {
@@ -303,7 +152,7 @@ type ChessStep struct {
 func (x *ChessStep) Reset() {
 	*x = ChessStep{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[5]
+		mi := &file_game_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -316,7 +165,7 @@ func (x *ChessStep) String() string {
 func (*ChessStep) ProtoMessage() {}
 
 func (x *ChessStep) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[5]
+	mi := &file_game_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -329,7 +178,7 @@ func (x *ChessStep) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChessStep.ProtoReflect.Descriptor instead.
 func (*ChessStep) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{5}
+	return file_game_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ChessStep) GetPoint() *Point {
@@ -358,7 +207,7 @@ type GobangInfo struct {
 func (x *GobangInfo) Reset() {
 	*x = GobangInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[6]
+		mi := &file_game_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -371,7 +220,7 @@ func (x *GobangInfo) String() string {
 func (*GobangInfo) ProtoMessage() {}
 
 func (x *GobangInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[6]
+	mi := &file_game_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -384,7 +233,7 @@ func (x *GobangInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GobangInfo.ProtoReflect.Descriptor instead.
 func (*GobangInfo) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{6}
+	return file_game_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GobangInfo) GetChessSteps() []*ChessStep {
@@ -394,110 +243,8 @@ func (x *GobangInfo) GetChessSteps() []*ChessStep {
 	return nil
 }
 
-// 走一步
-type C2SGobangStep struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Point *Point `protobuf:"bytes,1,opt,name=point,proto3" json:"point,omitempty"`
-}
-
-func (x *C2SGobangStep) Reset() {
-	*x = C2SGobangStep{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[7]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *C2SGobangStep) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*C2SGobangStep) ProtoMessage() {}
-
-func (x *C2SGobangStep) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[7]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use C2SGobangStep.ProtoReflect.Descriptor instead.
-func (*C2SGobangStep) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *C2SGobangStep) GetPoint() *Point {
-	if x != nil {
-		return x.Point
-	}
-	return nil
-}
-
-// 当前局势
-type S2CGobangStep struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Error      *Error      `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
-	GobangInfo *GobangInfo `protobuf:"bytes,2,opt,name=gobangInfo,proto3" json:"gobangInfo,omitempty"`
-}
-
-func (x *S2CGobangStep) Reset() {
-	*x = S2CGobangStep{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *S2CGobangStep) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*S2CGobangStep) ProtoMessage() {}
-
-func (x *S2CGobangStep) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use S2CGobangStep.ProtoReflect.Descriptor instead.
-func (*S2CGobangStep) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *S2CGobangStep) GetError() *Error {
-	if x != nil {
-		return x.Error
-	}
-	return nil
-}
-
-func (x *S2CGobangStep) GetGobangInfo() *GobangInfo {
-	if x != nil {
-		return x.GobangInfo
-	}
-	return nil
-}
-
+//============PROTOCOL===========//
+// ping
 type C2SPing struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -509,7 +256,7 @@ type C2SPing struct {
 func (x *C2SPing) Reset() {
 	*x = C2SPing{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[9]
+		mi := &file_game_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -522,7 +269,7 @@ func (x *C2SPing) String() string {
 func (*C2SPing) ProtoMessage() {}
 
 func (x *C2SPing) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[9]
+	mi := &file_game_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -535,7 +282,7 @@ func (x *C2SPing) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use C2SPing.ProtoReflect.Descriptor instead.
 func (*C2SPing) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{9}
+	return file_game_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *C2SPing) GetTimestamp() int64 {
@@ -557,7 +304,7 @@ type S2CPing struct {
 func (x *S2CPing) Reset() {
 	*x = S2CPing{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_game_proto_msgTypes[10]
+		mi := &file_game_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -570,7 +317,7 @@ func (x *S2CPing) String() string {
 func (*S2CPing) ProtoMessage() {}
 
 func (x *S2CPing) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[10]
+	mi := &file_game_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -583,7 +330,7 @@ func (x *S2CPing) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use S2CPing.ProtoReflect.Descriptor instead.
 func (*S2CPing) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{10}
+	return file_game_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *S2CPing) GetError() *Error {
@@ -600,67 +347,396 @@ func (x *S2CPing) GetTimestamp() int64 {
 	return 0
 }
 
+// 登陆
+type C2SLogin struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	NickName  string `protobuf:"bytes,1,opt,name=NickName,proto3" json:"NickName,omitempty"`   // 昵称
+	AvatarUrl string `protobuf:"bytes,2,opt,name=AvatarUrl,proto3" json:"AvatarUrl,omitempty"` // 头像
+}
+
+func (x *C2SLogin) Reset() {
+	*x = C2SLogin{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_game_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2SLogin) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2SLogin) ProtoMessage() {}
+
+func (x *C2SLogin) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2SLogin.ProtoReflect.Descriptor instead.
+func (*C2SLogin) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *C2SLogin) GetNickName() string {
+	if x != nil {
+		return x.NickName
+	}
+	return ""
+}
+
+func (x *C2SLogin) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
+	}
+	return ""
+}
+
+type S2CLogin struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ErrorCode string `protobuf:"bytes,1,opt,name=ErrorCode,proto3" json:"ErrorCode,omitempty"`
+}
+
+func (x *S2CLogin) Reset() {
+	*x = S2CLogin{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_game_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CLogin) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CLogin) ProtoMessage() {}
+
+func (x *S2CLogin) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CLogin.ProtoReflect.Descriptor instead.
+func (*S2CLogin) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *S2CLogin) GetErrorCode() string {
+	if x != nil {
+		return x.ErrorCode
+	}
+	return ""
+}
+
+// 匹配
+type C2SMatch struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MatchType MatchType `protobuf:"varint,1,opt,name=match_type,json=matchType,proto3,enum=gamepb.MatchType" json:"match_type,omitempty"`
+}
+
+func (x *C2SMatch) Reset() {
+	*x = C2SMatch{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_game_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2SMatch) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2SMatch) ProtoMessage() {}
+
+func (x *C2SMatch) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2SMatch.ProtoReflect.Descriptor instead.
+func (*C2SMatch) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *C2SMatch) GetMatchType() MatchType {
+	if x != nil {
+		return x.MatchType
+	}
+	return MatchType_MatchTypeDefault
+}
+
+type S2CMatch struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	EnemyName      string      `protobuf:"bytes,1,opt,name=enemyName,proto3" json:"enemyName,omitempty"`                // 敌方昵称
+	EnemyAvatarUrl string      `protobuf:"bytes,2,opt,name=enemyAvatarUrl,proto3" json:"enemyAvatarUrl,omitempty"`      // 敌方头像
+	Color          ColorType   `protobuf:"varint,3,opt,name=color,proto3,enum=gamepb.ColorType" json:"color,omitempty"` // 阵营（红方、黑方）
+	Result         MatchResult `protobuf:"varint,4,opt,name=result,proto3,enum=gamepb.MatchResult" json:"result,omitempty"`
+}
+
+func (x *S2CMatch) Reset() {
+	*x = S2CMatch{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_game_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CMatch) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CMatch) ProtoMessage() {}
+
+func (x *S2CMatch) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CMatch.ProtoReflect.Descriptor instead.
+func (*S2CMatch) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *S2CMatch) GetEnemyName() string {
+	if x != nil {
+		return x.EnemyName
+	}
+	return ""
+}
+
+func (x *S2CMatch) GetEnemyAvatarUrl() string {
+	if x != nil {
+		return x.EnemyAvatarUrl
+	}
+	return ""
+}
+
+func (x *S2CMatch) GetColor() ColorType {
+	if x != nil {
+		return x.Color
+	}
+	return ColorType_ColorTypeDefault
+}
+
+func (x *S2CMatch) GetResult() MatchResult {
+	if x != nil {
+		return x.Result
+	}
+	return MatchResult_MatResultDefault
+}
+
+// 走一步
+type C2SStep struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Point *Point `protobuf:"bytes,1,opt,name=point,proto3" json:"point,omitempty"`
+}
+
+func (x *C2SStep) Reset() {
+	*x = C2SStep{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_game_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2SStep) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2SStep) ProtoMessage() {}
+
+func (x *C2SStep) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2SStep.ProtoReflect.Descriptor instead.
+func (*C2SStep) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *C2SStep) GetPoint() *Point {
+	if x != nil {
+		return x.Point
+	}
+	return nil
+}
+
+type S2CStep struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Error      *Error      `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+	GobangInfo *GobangInfo `protobuf:"bytes,2,opt,name=gobangInfo,proto3" json:"gobangInfo,omitempty"`
+}
+
+func (x *S2CStep) Reset() {
+	*x = S2CStep{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_game_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CStep) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CStep) ProtoMessage() {}
+
+func (x *S2CStep) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CStep.ProtoReflect.Descriptor instead.
+func (*S2CStep) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *S2CStep) GetError() *Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
+func (x *S2CStep) GetGobangInfo() *GobangInfo {
+	if x != nil {
+		return x.GobangInfo
+	}
+	return nil
+}
+
 var File_game_proto protoreflect.FileDescriptor
 
 var file_game_proto_rawDesc = []byte{
 	0x0a, 0x0a, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x06, 0x67, 0x61,
-	0x6d, 0x65, 0x70, 0x62, 0x1a, 0x0b, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x22, 0x22, 0x0a, 0x0c, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x26, 0x0a, 0x0a, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65,
-	0x70, 0x6c, 0x79, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x50, 0x0a,
-	0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x4e, 0x6f, 0x74, 0x65, 0x12, 0x29, 0x0a, 0x08, 0x6c, 0x6f,
-	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x67,
-	0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x08, 0x6c, 0x6f, 0x63,
-	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22,
-	0x54, 0x0a, 0x05, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x2f, 0x0a, 0x09, 0x65, 0x72, 0x72, 0x6f,
-	0x72, 0x43, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x11, 0x2e, 0x67, 0x61,
-	0x6d, 0x65, 0x70, 0x62, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x54, 0x79, 0x70, 0x65, 0x52, 0x09,
-	0x65, 0x72, 0x72, 0x6f, 0x72, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x65, 0x72, 0x72,
-	0x6f, 0x72, 0x4d, 0x73, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x65, 0x72, 0x72,
-	0x6f, 0x72, 0x4d, 0x73, 0x67, 0x22, 0x37, 0x0a, 0x05, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x12, 0x0c,
-	0x0a, 0x01, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x01, 0x78, 0x12, 0x0c, 0x0a, 0x01,
-	0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x01, 0x79, 0x12, 0x12, 0x0a, 0x04, 0x43, 0x61,
-	0x6d, 0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x43, 0x61, 0x6d, 0x70, 0x22, 0x46,
-	0x0a, 0x09, 0x43, 0x68, 0x65, 0x73, 0x73, 0x53, 0x74, 0x65, 0x70, 0x12, 0x23, 0x0a, 0x05, 0x70,
-	0x6f, 0x69, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x67, 0x61, 0x6d,
-	0x65, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x05, 0x70, 0x6f, 0x69, 0x6e, 0x74,
-	0x12, 0x14, 0x0a, 0x05, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52,
-	0x05, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x22, 0x3f, 0x0a, 0x0a, 0x47, 0x6f, 0x62, 0x61, 0x6e, 0x67,
-	0x49, 0x6e, 0x66, 0x6f, 0x12, 0x31, 0x0a, 0x0a, 0x63, 0x68, 0x65, 0x73, 0x73, 0x53, 0x74, 0x65,
-	0x70, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70,
-	0x62, 0x2e, 0x43, 0x68, 0x65, 0x73, 0x73, 0x53, 0x74, 0x65, 0x70, 0x52, 0x0a, 0x63, 0x68, 0x65,
-	0x73, 0x73, 0x53, 0x74, 0x65, 0x70, 0x73, 0x22, 0x34, 0x0a, 0x0d, 0x43, 0x32, 0x53, 0x47, 0x6f,
-	0x62, 0x61, 0x6e, 0x67, 0x53, 0x74, 0x65, 0x70, 0x12, 0x23, 0x0a, 0x05, 0x70, 0x6f, 0x69, 0x6e,
-	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62,
-	0x2e, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x05, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x22, 0x68, 0x0a,
-	0x0d, 0x53, 0x32, 0x43, 0x47, 0x6f, 0x62, 0x61, 0x6e, 0x67, 0x53, 0x74, 0x65, 0x70, 0x12, 0x23,
+	0x6d, 0x65, 0x70, 0x62, 0x1a, 0x0a, 0x65, 0x6e, 0x75, 0x6d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x1a, 0x0b, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x54, 0x0a,
+	0x05, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x2f, 0x0a, 0x09, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x43,
+	0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x11, 0x2e, 0x67, 0x61, 0x6d, 0x65,
+	0x70, 0x62, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x54, 0x79, 0x70, 0x65, 0x52, 0x09, 0x65, 0x72,
+	0x72, 0x6f, 0x72, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x65, 0x72, 0x72, 0x6f, 0x72,
+	0x4d, 0x73, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x65, 0x72, 0x72, 0x6f, 0x72,
+	0x4d, 0x73, 0x67, 0x22, 0x37, 0x0a, 0x05, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x12, 0x0c, 0x0a, 0x01,
+	0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x01, 0x78, 0x12, 0x0c, 0x0a, 0x01, 0x79, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x01, 0x79, 0x12, 0x12, 0x0a, 0x04, 0x43, 0x61, 0x6d, 0x70,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x43, 0x61, 0x6d, 0x70, 0x22, 0x46, 0x0a, 0x09,
+	0x43, 0x68, 0x65, 0x73, 0x73, 0x53, 0x74, 0x65, 0x70, 0x12, 0x23, 0x0a, 0x05, 0x70, 0x6f, 0x69,
+	0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70,
+	0x62, 0x2e, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x05, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x12, 0x14,
+	0x0a, 0x05, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x69,
+	0x6e, 0x64, 0x65, 0x78, 0x22, 0x3f, 0x0a, 0x0a, 0x47, 0x6f, 0x62, 0x61, 0x6e, 0x67, 0x49, 0x6e,
+	0x66, 0x6f, 0x12, 0x31, 0x0a, 0x0a, 0x63, 0x68, 0x65, 0x73, 0x73, 0x53, 0x74, 0x65, 0x70, 0x73,
+	0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e,
+	0x43, 0x68, 0x65, 0x73, 0x73, 0x53, 0x74, 0x65, 0x70, 0x52, 0x0a, 0x63, 0x68, 0x65, 0x73, 0x73,
+	0x53, 0x74, 0x65, 0x70, 0x73, 0x22, 0x27, 0x0a, 0x07, 0x43, 0x32, 0x53, 0x50, 0x69, 0x6e, 0x67,
+	0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x22, 0x4c,
+	0x0a, 0x07, 0x53, 0x32, 0x43, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x23, 0x0a, 0x05, 0x65, 0x72, 0x72,
+	0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70,
+	0x62, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x1c,
+	0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x22, 0x44, 0x0a, 0x08,
+	0x43, 0x32, 0x53, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x12, 0x1a, 0x0a, 0x08, 0x4e, 0x69, 0x63, 0x6b,
+	0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x4e, 0x69, 0x63, 0x6b,
+	0x4e, 0x61, 0x6d, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x41, 0x76, 0x61, 0x74, 0x61, 0x72, 0x55, 0x72,
+	0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x41, 0x76, 0x61, 0x74, 0x61, 0x72, 0x55,
+	0x72, 0x6c, 0x22, 0x28, 0x0a, 0x08, 0x53, 0x32, 0x43, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x12, 0x1c,
+	0x0a, 0x09, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x43, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x09, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x43, 0x6f, 0x64, 0x65, 0x22, 0x3c, 0x0a, 0x08,
+	0x43, 0x32, 0x53, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x12, 0x30, 0x0a, 0x0a, 0x6d, 0x61, 0x74, 0x63,
+	0x68, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x11, 0x2e, 0x67,
+	0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x54, 0x79, 0x70, 0x65, 0x52,
+	0x09, 0x6d, 0x61, 0x74, 0x63, 0x68, 0x54, 0x79, 0x70, 0x65, 0x22, 0xa6, 0x01, 0x0a, 0x08, 0x53,
+	0x32, 0x43, 0x4d, 0x61, 0x74, 0x63, 0x68, 0x12, 0x1c, 0x0a, 0x09, 0x65, 0x6e, 0x65, 0x6d, 0x79,
+	0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x65, 0x6e, 0x65, 0x6d,
+	0x79, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x26, 0x0a, 0x0e, 0x65, 0x6e, 0x65, 0x6d, 0x79, 0x41, 0x76,
+	0x61, 0x74, 0x61, 0x72, 0x55, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x65,
+	0x6e, 0x65, 0x6d, 0x79, 0x41, 0x76, 0x61, 0x74, 0x61, 0x72, 0x55, 0x72, 0x6c, 0x12, 0x27, 0x0a,
+	0x05, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x11, 0x2e, 0x67,
+	0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e, 0x43, 0x6f, 0x6c, 0x6f, 0x72, 0x54, 0x79, 0x70, 0x65, 0x52,
+	0x05, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x12, 0x2b, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x13, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e,
+	0x4d, 0x61, 0x74, 0x63, 0x68, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x52, 0x06, 0x72, 0x65, 0x73,
+	0x75, 0x6c, 0x74, 0x22, 0x2e, 0x0a, 0x07, 0x43, 0x32, 0x53, 0x53, 0x74, 0x65, 0x70, 0x12, 0x23,
+	0x0a, 0x05, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e,
+	0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x05, 0x70, 0x6f,
+	0x69, 0x6e, 0x74, 0x22, 0x62, 0x0a, 0x07, 0x53, 0x32, 0x43, 0x53, 0x74, 0x65, 0x70, 0x12, 0x23,
 	0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e,
 	0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72,
 	0x72, 0x6f, 0x72, 0x12, 0x32, 0x0a, 0x0a, 0x67, 0x6f, 0x62, 0x61, 0x6e, 0x67, 0x49, 0x6e, 0x66,
 	0x6f, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62,
 	0x2e, 0x47, 0x6f, 0x62, 0x61, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0a, 0x67, 0x6f, 0x62,
-	0x61, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x22, 0x27, 0x0a, 0x07, 0x43, 0x32, 0x53, 0x50, 0x69,
-	0x6e, 0x67, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70,
-	0x22, 0x4c, 0x0a, 0x07, 0x53, 0x32, 0x43, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x23, 0x0a, 0x05, 0x65,
-	0x72, 0x72, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x67, 0x61, 0x6d,
-	0x65, 0x70, 0x62, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72,
-	0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x32, 0x7a,
-	0x0a, 0x07, 0x47, 0x72, 0x65, 0x65, 0x74, 0x65, 0x72, 0x12, 0x36, 0x0a, 0x08, 0x53, 0x61, 0x79,
-	0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x12, 0x14, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e, 0x48,
-	0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x12, 0x2e, 0x67, 0x61,
-	0x6d, 0x65, 0x70, 0x62, 0x2e, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22,
-	0x00, 0x12, 0x37, 0x0a, 0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x43, 0x68, 0x61, 0x74, 0x12, 0x11,
-	0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x4e, 0x6f, 0x74,
-	0x65, 0x1a, 0x11, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65,
-	0x4e, 0x6f, 0x74, 0x65, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x42, 0x2a, 0x0a, 0x06, 0x67, 0x61,
-	0x6d, 0x65, 0x70, 0x62, 0x42, 0x06, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x50, 0x01, 0x5a, 0x16,
-	0x74, 0x69, 0x61, 0x6f, 0x79, 0x75, 0x79, 0x75, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x70, 0x62, 0x2f,
-	0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x61, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x42, 0x2a, 0x0a, 0x06, 0x67, 0x61, 0x6d, 0x65, 0x70,
+	0x62, 0x42, 0x06, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x50, 0x01, 0x5a, 0x16, 0x74, 0x69, 0x61,
+	0x6f, 0x79, 0x75, 0x79, 0x75, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x70, 0x62, 0x2f, 0x67, 0x61, 0x6d,
+	0x65, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -675,39 +751,41 @@ func file_game_proto_rawDescGZIP() []byte {
 	return file_game_proto_rawDescData
 }
 
-var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_game_proto_goTypes = []interface{}{
-	(*HelloRequest)(nil),  // 0: gamepb.HelloRequest
-	(*HelloReply)(nil),    // 1: gamepb.HelloReply
-	(*RouteNote)(nil),     // 2: gamepb.RouteNote
-	(*Error)(nil),         // 3: gamepb.Error
-	(*Point)(nil),         // 4: gamepb.Point
-	(*ChessStep)(nil),     // 5: gamepb.ChessStep
-	(*GobangInfo)(nil),    // 6: gamepb.GobangInfo
-	(*C2SGobangStep)(nil), // 7: gamepb.C2SGobangStep
-	(*S2CGobangStep)(nil), // 8: gamepb.S2CGobangStep
-	(*C2SPing)(nil),       // 9: gamepb.C2SPing
-	(*S2CPing)(nil),       // 10: gamepb.S2CPing
-	(ErrorType)(0),        // 11: gamepb.ErrorType
+	(*Error)(nil),      // 0: gamepb.Error
+	(*Point)(nil),      // 1: gamepb.Point
+	(*ChessStep)(nil),  // 2: gamepb.ChessStep
+	(*GobangInfo)(nil), // 3: gamepb.GobangInfo
+	(*C2SPing)(nil),    // 4: gamepb.C2SPing
+	(*S2CPing)(nil),    // 5: gamepb.S2CPing
+	(*C2SLogin)(nil),   // 6: gamepb.C2SLogin
+	(*S2CLogin)(nil),   // 7: gamepb.S2CLogin
+	(*C2SMatch)(nil),   // 8: gamepb.C2SMatch
+	(*S2CMatch)(nil),   // 9: gamepb.S2CMatch
+	(*C2SStep)(nil),    // 10: gamepb.C2SStep
+	(*S2CStep)(nil),    // 11: gamepb.S2CStep
+	(ErrorType)(0),     // 12: gamepb.ErrorType
+	(MatchType)(0),     // 13: gamepb.MatchType
+	(ColorType)(0),     // 14: gamepb.ColorType
+	(MatchResult)(0),   // 15: gamepb.MatchResult
 }
 var file_game_proto_depIdxs = []int32{
-	4,  // 0: gamepb.RouteNote.location:type_name -> gamepb.Point
-	11, // 1: gamepb.Error.errorCode:type_name -> gamepb.ErrorType
-	4,  // 2: gamepb.ChessStep.point:type_name -> gamepb.Point
-	5,  // 3: gamepb.GobangInfo.chessSteps:type_name -> gamepb.ChessStep
-	4,  // 4: gamepb.C2SGobangStep.point:type_name -> gamepb.Point
-	3,  // 5: gamepb.S2CGobangStep.error:type_name -> gamepb.Error
-	6,  // 6: gamepb.S2CGobangStep.gobangInfo:type_name -> gamepb.GobangInfo
-	3,  // 7: gamepb.S2CPing.error:type_name -> gamepb.Error
-	0,  // 8: gamepb.Greeter.SayHello:input_type -> gamepb.HelloRequest
-	2,  // 9: gamepb.Greeter.RouteChat:input_type -> gamepb.RouteNote
-	1,  // 10: gamepb.Greeter.SayHello:output_type -> gamepb.HelloReply
-	2,  // 11: gamepb.Greeter.RouteChat:output_type -> gamepb.RouteNote
-	10, // [10:12] is the sub-list for method output_type
-	8,  // [8:10] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	12, // 0: gamepb.Error.errorCode:type_name -> gamepb.ErrorType
+	1,  // 1: gamepb.ChessStep.point:type_name -> gamepb.Point
+	2,  // 2: gamepb.GobangInfo.chessSteps:type_name -> gamepb.ChessStep
+	0,  // 3: gamepb.S2CPing.error:type_name -> gamepb.Error
+	13, // 4: gamepb.C2SMatch.match_type:type_name -> gamepb.MatchType
+	14, // 5: gamepb.S2CMatch.color:type_name -> gamepb.ColorType
+	15, // 6: gamepb.S2CMatch.result:type_name -> gamepb.MatchResult
+	1,  // 7: gamepb.C2SStep.point:type_name -> gamepb.Point
+	0,  // 8: gamepb.S2CStep.error:type_name -> gamepb.Error
+	3,  // 9: gamepb.S2CStep.gobangInfo:type_name -> gamepb.GobangInfo
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_game_proto_init() }
@@ -715,45 +793,10 @@ func file_game_proto_init() {
 	if File_game_proto != nil {
 		return
 	}
+	file_enum_proto_init()
 	file_error_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_game_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HelloRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_game_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HelloReply); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_game_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RouteNote); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_game_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Error); i {
 			case 0:
 				return &v.state
@@ -765,7 +808,7 @@ func file_game_proto_init() {
 				return nil
 			}
 		}
-		file_game_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_game_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Point); i {
 			case 0:
 				return &v.state
@@ -777,7 +820,7 @@ func file_game_proto_init() {
 				return nil
 			}
 		}
-		file_game_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_game_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ChessStep); i {
 			case 0:
 				return &v.state
@@ -789,7 +832,7 @@ func file_game_proto_init() {
 				return nil
 			}
 		}
-		file_game_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_game_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GobangInfo); i {
 			case 0:
 				return &v.state
@@ -801,31 +844,7 @@ func file_game_proto_init() {
 				return nil
 			}
 		}
-		file_game_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2SGobangStep); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_game_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*S2CGobangStep); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_game_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_game_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*C2SPing); i {
 			case 0:
 				return &v.state
@@ -837,8 +856,80 @@ func file_game_proto_init() {
 				return nil
 			}
 		}
-		file_game_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_game_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*S2CPing); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_game_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2SLogin); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_game_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CLogin); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_game_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2SMatch); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_game_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CMatch); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_game_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2SStep); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_game_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CStep); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -856,9 +947,9 @@ func file_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_game_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   0,
 		},
 		GoTypes:           file_game_proto_goTypes,
 		DependencyIndexes: file_game_proto_depIdxs,

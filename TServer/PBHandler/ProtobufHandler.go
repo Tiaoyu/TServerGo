@@ -2,26 +2,36 @@ package pbhandler
 
 import (
 	logger "TServerGo/Log"
+	"TServerGo/TServer/MatchSystem"
+	"TServerGo/TServer/PB"
+	"TServerGo/TServer/Sessionx"
+	"TServerGo/TServer/UserSystem"
 	"TServerGo/pb"
 	"encoding/binary"
-	"log"
-
 	"google.golang.org/protobuf/proto"
+	"log"
 )
 
 var (
-	pbMap map[gamepb.ProtocolType]func(msg []byte) ([]byte, uint32, error)
+	pbMap map[gamepb.ProtocolType]func(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error)
 )
 
 func init() {
-	pbMap = make(map[gamepb.ProtocolType]func(msg []byte) ([]byte, uint32, error))
+	pbMap = make(map[gamepb.ProtocolType]func(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error))
 	pbMap[gamepb.ProtocolType_EC2SPing] = OnPing
+	pbMap[gamepb.ProtocolType_EC2SLogin] = OnLogin
+	pbMap[gamepb.ProtocolType_EC2SMatch] = OnMatch
+	pbMap[gamepb.ProtocolType_EC2SStep] = OnStep
+
 }
 
 type HandlerProtobuf struct {
+	sess *Sessionx.Session
 }
 
 func (h *HandlerProtobuf) HandlerPB(ws *ConnectInfo, msg []byte) ([]byte, error) {
+	defer ws.Clear()
+
 	// 获取协议长度 4字节
 	if len(ws.MsgHead) < 4 {
 		if len(ws.MsgLastBytes) > 0 {
@@ -66,12 +76,22 @@ func (h *HandlerProtobuf) HandlerPB(ws *ConnectInfo, msg []byte) ([]byte, error)
 		protoId := binary.BigEndian.Uint32(ws.MsgContent[:4])
 		call, ok := pbMap[gamepb.ProtocolType(protoId)]
 		if !ok {
-			ws.Clear()
 			return nil, nil
 		}
-		ack, ackPId, _ := call(ws.MsgContent[4:])
 
-		ws.Clear()
+		// 登陆
+		var sess *Sessionx.Session
+		if protoId == uint32(gamepb.ProtocolType_EC2SLogin) {
+			sess = &Sessionx.Session{
+				Conn:       ws.SOCKET,
+				RemoteAttr: ws.SOCKET.RemoteAddr().String(),
+				SendBuffer: make(chan []byte),
+			}
+			h.sess = sess
+			go SendLoop(sess)
+		}
+
+		ack, ackPId, _ := call(sess, ws.MsgContent[4:])
 
 		var bufHead = make([]byte, 4)
 		var bufPId = make([]byte, 4)
@@ -79,19 +99,96 @@ func (h *HandlerProtobuf) HandlerPB(ws *ConnectInfo, msg []byte) ([]byte, error)
 		binary.BigEndian.PutUint32(bufHead, uint32(len(ack)+4))
 		bufHead = append(bufHead, bufPId...)
 		bufHead = append(bufHead, ack...)
-		ws.SOCKET.Write(bufHead) // todo 放到写协程中处理
+		if protoId == uint32(gamepb.ProtocolType_EC2SPing) {
+			ws.SOCKET.Write(bufHead)
+		} else {
+			sess.SendBuffer <- bufHead
+		}
 	}
 	return nil, nil
 }
-func OnPing(msg []byte) ([]byte, uint32, error) {
+
+func SendLoop(sess *Sessionx.Session) {
+	for {
+		select {
+		case msg, ok := <-sess.SendBuffer:
+			if !ok {
+				continue
+			}
+			sess.Send(msg)
+			break
+		}
+	}
+}
+
+func OnLogin(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
 	logger.Debugf("Recv msg bytes:%v", msg)
-	p := &gamepb.C2SPing{}
-	if err := proto.Unmarshal(msg, p); err != nil {
+	req := &gamepb.C2SLogin{}
+	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Fatalln("Failed to parse C2SPing:", err)
 	}
-	logger.Debugf("Recv msg:%v", p)
+	logger.Debugf("Recv msg:%v", req)
 
-	ack, _ := proto.Marshal(&gamepb.S2CPing{Timestamp: p.Timestamp})
+	player := &UserSystem.Player{
+		OpenId:      "",
+		NickName:    req.NickName,
+		AvatarUrl:   req.AvatarUrl,
+		RemoteAddr:  sess.RemoteAttr,
+		SendChannel: make(chan []byte),
+		Sess:        sess,
+	}
+	UserSystem.PlayerLogin(player)
+
+	ack, _ := proto.Marshal(&gamepb.S2CLogin{ErrorCode: "success"})
+	return ack, uint32(gamepb.ProtocolType_ES2CPing), nil
+}
+
+func OnPing(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
+	logger.Debugf("Recv msg bytes:%v", msg)
+	req := &gamepb.C2SPing{}
+	if err := proto.Unmarshal(msg, req); err != nil {
+		log.Fatalln("Failed to parse C2SPing:", err)
+	}
+	logger.Debugf("Recv msg:%v", req)
+
+	ack, _ := proto.Marshal(&gamepb.S2CPing{Timestamp: req.Timestamp})
 
 	return ack, uint32(gamepb.ProtocolType_ES2CPing), nil
+}
+
+func OnMatch(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
+	req := &gamepb.C2SMatch{}
+	if err := proto.Unmarshal(msg, req); err != nil {
+		log.Fatalln("Failed to parse C2SMatch:", err)
+	}
+	logger.Debugf("Recv msg:%v", req)
+	player, ok := UserSystem.PlayerRemoteMap[sess.RemoteAttr]
+	if !ok {
+		return nil, 0, nil
+	}
+	if req.MatchType == PB.MatchTypeMatch {
+		MatchSystem.JoinMatch(player)
+	} else if req.MatchType == PB.MatchTypeCancel {
+		MatchSystem.CancelMatch(player)
+	}
+
+	res, err := proto.Marshal(&gamepb.S2CMatch{
+		Result: gamepb.MatchResult_MatResultMatching,
+	})
+
+	return res, uint32(gamepb.ProtocolType_ES2CMatch), err
+}
+
+func OnStep(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
+	req := &gamepb.C2SStep{}
+	if err := proto.Unmarshal(msg, req); err != nil {
+		log.Fatalln("Failed to parse C2SStep:", err)
+	}
+	logger.Debugf("Recv msg:%v", req)
+
+	ack, _ := proto.Marshal(&gamepb.S2CStep{
+		Error:      nil,
+		GobangInfo: nil,
+	})
+	return ack, uint32(gamepb.ProtocolType_ES2CStep), nil
 }

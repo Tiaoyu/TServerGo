@@ -7,6 +7,7 @@ option java_outer_classname = "gamepb";
 
 package gamepb;
 
+import "enum.proto";
 import "error.proto";
 
 //============DATA===============//
@@ -36,23 +37,41 @@ message GobangInfo {
 //===============================//
 
 //============PROTOCOL===========//
-
-// 走一步
-message C2SGobangStep {
-    Point point = 1;
-}
-
-// 当前局势
-message S2CGobangStep {
-    Error error = 1;
-    GobangInfo gobangInfo = 2;
-}
-
+// ping
 message C2SPing {
     int64 timestamp = 1;
 }
 message S2CPing {
     Error error = 1;
     int64 timestamp = 2;
+}
+
+// 登陆
+message C2SLogin {
+    string    NickName = 1; // 昵称
+    string AvatarUrl = 2; // 头像
+}
+message S2CLogin {
+    string ErrorCode = 1;
+}
+
+// 匹配
+message C2SMatch {
+    MatchType  match_type = 1;
+}
+message S2CMatch {
+    string enemyName = 1; // 敌方昵称
+    string enemyAvatarUrl = 2; // 敌方头像
+    ColorType color = 3; // 阵营（红方、黑方）
+    MatchResult result = 4;
+}
+
+// 走一步
+message C2SStep {
+    Point point = 1;
+}
+message S2CStep {
+    Error error = 1;
+    GobangInfo gobangInfo = 2;
 }
 //==========================//
