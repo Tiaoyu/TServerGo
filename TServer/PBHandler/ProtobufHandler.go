@@ -3,12 +3,13 @@ package pbhandler
 import (
 	logger "TServerGo/Log"
 	"TServerGo/TServer/MatchSystem"
-	"TServerGo/TServer/PB"
+	"TServerGo/TServer/RoomSystem"
 	"TServerGo/TServer/Sessionx"
 	"TServerGo/TServer/UserSystem"
 	"TServerGo/pb"
 	"encoding/binary"
-	"google.golang.org/protobuf/proto"
+	"errors"
+	"github.com/golang/protobuf/proto"
 	"log"
 )
 
@@ -48,7 +49,7 @@ func (h *HandlerProtobuf) HandlerPB(ws *ConnectInfo, msg []byte) ([]byte, error)
 				//协议长度必须大于4 因为协议号会占4字节
 				logger.Error("Get msg size error, msg size must greater than 4")
 				ws.Clear()
-				return nil, nil
+				return nil, errors.New("msg size error")
 			}
 			ws.MsgSize = int32(protoSize)
 			logger.Debugf("Recv msg size:%v", protoSize)
@@ -72,8 +73,15 @@ func (h *HandlerProtobuf) HandlerPB(ws *ConnectInfo, msg []byte) ([]byte, error)
 		}
 	}
 	// 反序列化协议
+	h.ParsePB(ws, ws.MsgContent)
+	return nil, nil
+}
+
+// ParsePB 反序列化协议
+func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, error) {
+	// 反序列化协议
 	{
-		protoId := binary.BigEndian.Uint32(ws.MsgContent[:4])
+		protoId := binary.BigEndian.Uint32(msg[:4])
 		call, ok := pbMap[gamepb.ProtocolType(protoId)]
 		if !ok {
 			return nil, nil
@@ -82,16 +90,24 @@ func (h *HandlerProtobuf) HandlerPB(ws *ConnectInfo, msg []byte) ([]byte, error)
 		// 登陆
 		var sess *Sessionx.Session
 		if protoId == uint32(gamepb.ProtocolType_EC2SLogin) {
+			if h.sess != nil {
+				logger.Errorf("repeat login error")
+				return nil, nil
+			}
 			sess = &Sessionx.Session{
-				Conn:       ws.SOCKET,
-				RemoteAttr: ws.SOCKET.RemoteAddr().String(),
+				Conn:       connectInfo.SOCKET,
+				RemoteAttr: connectInfo.SOCKET.RemoteAddr().String(),
 				SendBuffer: make(chan []byte),
 			}
 			h.sess = sess
 			go SendLoop(sess)
 		}
 
-		ack, ackPId, _ := call(sess, ws.MsgContent[4:])
+		if h.sess == nil {
+			return nil, nil
+		}
+
+		ack, ackPId, _ := call(h.sess, msg[4:])
 
 		var bufHead = make([]byte, 4)
 		var bufPId = make([]byte, 4)
@@ -99,11 +115,7 @@ func (h *HandlerProtobuf) HandlerPB(ws *ConnectInfo, msg []byte) ([]byte, error)
 		binary.BigEndian.PutUint32(bufHead, uint32(len(ack)+4))
 		bufHead = append(bufHead, bufPId...)
 		bufHead = append(bufHead, ack...)
-		if protoId == uint32(gamepb.ProtocolType_EC2SPing) {
-			ws.SOCKET.Write(bufHead)
-		} else {
-			sess.SendBuffer <- bufHead
-		}
+		h.sess.SendBuffer <- bufHead
 	}
 	return nil, nil
 }
@@ -130,7 +142,7 @@ func OnLogin(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
 	logger.Debugf("Recv msg:%v", req)
 
 	player := &UserSystem.Player{
-		OpenId:      "",
+		OpenId:      req.NickName,
 		NickName:    req.NickName,
 		AvatarUrl:   req.AvatarUrl,
 		RemoteAddr:  sess.RemoteAttr,
@@ -166,9 +178,9 @@ func OnMatch(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
 	if !ok {
 		return nil, 0, nil
 	}
-	if req.MatchType == PB.MatchTypeMatch {
+	if req.MatchType == gamepb.MatchType_MatchTypeMatch {
 		MatchSystem.JoinMatch(player)
-	} else if req.MatchType == PB.MatchTypeCancel {
+	} else if req.MatchType == gamepb.MatchType_MatchTypeCancel {
 		MatchSystem.CancelMatch(player)
 	}
 
@@ -185,6 +197,32 @@ func OnStep(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
 		log.Fatalln("Failed to parse C2SStep:", err)
 	}
 	logger.Debugf("Recv msg:%v", req)
+
+	player, ok := UserSystem.PlayerRemoteMap[sess.RemoteAttr]
+	if !ok {
+		log.Println("player is nil, RemoteAddr:", sess.RemoteAttr)
+		return nil, 0, nil
+	}
+	value, ok := RoomSystem.RoomOpenIdMap.Load(player.OpenId)
+	if !ok {
+		log.Println("room is nil, OpenId:", player.OpenId)
+	}
+	room := value.(*RoomSystem.Room)
+	if room.TurnId != player.OpenId {
+		res, _ := proto.Marshal(&gamepb.S2CStep{
+			Error:      nil,
+			GobangInfo: nil,
+		})
+		return res, uint32(gamepb.ProtocolType_EC2SStep), nil
+	}
+	if room.BlackId == player.OpenId {
+		req.Point.Camp = int32(gamepb.ColorType_ColorTypeBlack)
+	} else if room.RedId == player.OpenId {
+		req.Point.Camp = int32(gamepb.ColorType_ColorTypeRed)
+	}
+	room.MsgChannel <- &gamepb.ChessStep{
+		Point: req.Point,
+	}
 
 	ack, _ := proto.Marshal(&gamepb.S2CStep{
 		Error:      nil,

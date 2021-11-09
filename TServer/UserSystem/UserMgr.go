@@ -5,7 +5,6 @@ import (
 	"TServerGo/TServer/Sessionx"
 	"TServerGo/TServer/dbproxy"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"xorm.io/xorm"
 )
@@ -18,7 +17,6 @@ type Player struct {
 	RemoteAddr  string
 	SessionKey  string
 	SendChannel chan []byte
-	Conn        *websocket.Conn
 	Sess        *Sessionx.Session
 }
 
@@ -66,15 +64,6 @@ func PlayerLogin(u *Player) {
 		log.Printf("Login failed! OpenId:%v NickName:%v Error:%v\n", u.OpenId, u.NickName, err)
 	}
 
-	go func() {
-		for {
-			select {
-			case res := <-u.SendChannel:
-				u.Conn.WriteMessage(websocket.TextMessage, res)
-			}
-		}
-	}()
-
 	log.Printf("%v login success, OpenId:%v RemoteAddr:%v", u.NickName, u.OpenId, u.RemoteAddr)
 
 	NotifySystem.NotifyExec(NotifySystem.NotifyTypeRoleLoginIn, NotifySystem.NotifyRoleLoginParam{
@@ -88,7 +77,7 @@ func PlayerLogout(params ...interface{}) {
 	if tmp, ok := PlayerRemoteMap[param.RemoteAddr]; ok {
 		delete(PlayerRemoteMap, tmp.RemoteAddr)
 		delete(PlayerOpenIdMap, tmp.OpenId)
-		tmp.Conn.Close()
+		tmp.Sess.Close()
 		log.Printf("Player closed. OpenId:%v RemoteAddr:%v NickName:%v", tmp.OpenId, tmp.RemoteAddr, tmp.NickName)
 	}
 }

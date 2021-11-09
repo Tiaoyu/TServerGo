@@ -74,4 +74,9 @@ message S2CStep {
     Error error = 1;
     GobangInfo gobangInfo = 2;
 }
+
+// 对局结果
+message S2CGameResult {
+    GameResult result = 1;
+}
 //==========================//

@@ -7,10 +7,11 @@ package RoomSystem
 
 import (
 	"TServerGo/TServer/NotifySystem"
-	"TServerGo/TServer/PB"
 	"TServerGo/TServer/UserSystem"
 	"TServerGo/TServer/dbproxy"
+	gamepb "TServerGo/pb"
 	"encoding/json"
+	"github.com/golang/protobuf/proto"
 	"log"
 	"sync"
 	"time"
@@ -22,10 +23,10 @@ type Room struct {
 	RedId         string
 	BlackId       string
 	CreateTime    int64
-	ChessStepList []PB.ChessStep
-	GobangInfo    [15][15]int
+	ChessStepList []*gamepb.ChessStep
+	GobangInfo    [15][15]int32
 	TurnId        string // 当前手
-	MsgChannel    chan PB.ChessStep
+	MsgChannel    chan *gamepb.ChessStep
 
 	GoBangTemp [15][15]*Piece // 对局辅助信息 用来标志每个位置的四个方向的连珠数
 }
@@ -58,27 +59,25 @@ func RoomLogic(room *Room) error {
 	}
 
 	//分别给红方、黑方发送对手 消息
-	res, _ := json.Marshal(&PB.MatchAck{
-		Id:             1202,
-		ErrorCode:      "SUCCESS",
+	res, _ := proto.Marshal(&gamepb.S2CMatch{
 		EnemyName:      blackPlayer.NickName,
 		EnemyAvatarUrl: blackPlayer.AvatarUrl,
-		Color:          1,
+		Color:          gamepb.ColorType_ColorTypeBlack,
+		Result:         gamepb.MatchResult_MatResultSuccess,
 	})
 	redPlayer.SendChannel <- res
-	res, _ = json.Marshal(&PB.MatchAck{
-		Id:             1202,
-		ErrorCode:      "SUCCESS",
+	res, _ = proto.Marshal(&gamepb.S2CMatch{
 		EnemyName:      redPlayer.NickName,
 		EnemyAvatarUrl: redPlayer.AvatarUrl,
-		Color:          2,
+		Color:          gamepb.ColorType_ColorTypeBlack,
+		Result:         gamepb.MatchResult_MatResultSuccess,
 	})
 	blackPlayer.SendChannel <- res
 
 	// 加入房间管理
 	RoomOpenIdMap.Store(room.RedId, room)
 	RoomOpenIdMap.Store(room.BlackId, room)
-	room.MsgChannel = make(chan PB.ChessStep, 0)
+	room.MsgChannel = make(chan *gamepb.ChessStep, 0)
 	room.CreateTime = time.Now().Unix()
 	go func() {
 		d := time.Duration(time.Second * 2)
@@ -96,37 +95,38 @@ func RoomLogic(room *Room) error {
 				break
 			case step := <-room.MsgChannel:
 				{
-					if !isPosValid(room, step.Pos) {
-						log.Printf("%v step to an wrong pos (%v)\n", step.Color, step.Pos)
+					if !isPosValid(room, step.Point) {
+						log.Printf("%v step to an wrong pos (%v)\n", step.Point.Camp, step.Point)
 						continue
 					}
-					log.Println(step.Color, " step to ", step.Pos)
-					room.GobangInfo[step.Pos.X][step.Pos.Y] = step.Color
+					log.Println(step.Point.Camp, " step to ", step.Point)
+					room.GobangInfo[step.Point.X][step.Point.Y] = step.Point.Camp
 					room.ChessStepList = append(room.ChessStepList, step)
 					// 当前位置没人下过则创建一步棋
-					if temp := room.GoBangTemp[step.Pos.X][step.Pos.Y]; temp == nil {
+					if temp := room.GoBangTemp[step.Point.X][step.Point.Y]; temp == nil {
 						temp = &Piece{
 							horizontal: 0,
 							vertical:   0,
 							lOblique:   0,
 							rOblique:   0,
 						}
-						if step.Color == PB.ColorTypeRed {
+						if step.Point.Camp == int32(gamepb.ColorType_ColorTypeRed) {
 							temp.openId = room.RedId
 							room.TurnId = room.BlackId
-						} else if step.Color == PB.ColorTypeBlack {
+						} else if step.Point.Camp == int32(gamepb.ColorType_ColorTypeBlack) {
 							temp.openId = room.BlackId
 							room.TurnId = room.RedId
 						}
-						room.GoBangTemp[step.Pos.X][step.Pos.Y] = temp
+						room.GoBangTemp[step.Point.X][step.Point.Y] = temp
 					}
 
 					// 更新棋盘数据
-					updateGobangTemp(room, step.Pos.X, step.Pos.Y)
-					res, _ := json.Marshal(&PB.ChessStepAck{
-						Id:        1302,
-						ErrorCode: "SUCCESS",
-						Steps:     room.ChessStepList,
+					updateGobangTemp(room, step.Point.X, step.Point.Y)
+					res, _ := proto.Marshal(&gamepb.S2CStep{
+						Error: nil,
+						GobangInfo: &gamepb.GobangInfo{
+							ChessSteps: room.ChessStepList,
+						},
 					})
 					if user := UserSystem.GetPlayerByOpenId(room.RedId); user != nil {
 						user.SendChannel <- res
@@ -140,15 +140,11 @@ func RoomLogic(room *Room) error {
 					// 判断胜负
 					winId, isWin := WhoWin(room)
 					if isWin {
-						wRes, _ := json.Marshal(&PB.GameResultAck{
-							Id:         1402,
-							ErrorCode:  "SUCCESS",
-							GameResult: "WIN",
+						wRes, _ := proto.Marshal(&gamepb.S2CGameResult{
+							Result: gamepb.GameResult_GameResultWin,
 						})
-						lRes, _ := json.Marshal(&PB.GameResultAck{
-							Id:         1402,
-							ErrorCode:  "SUCCESS",
-							GameResult: "LOSE",
+						lRes, _ := json.Marshal(&gamepb.S2CGameResult{
+							Result: gamepb.GameResult_GameResultFail,
 						})
 
 						if winId == redPlayer.OpenId {
@@ -221,7 +217,7 @@ func WhoWin(room *Room) (string, bool) {
 }
 
 // 位置是否合法
-func isPosValid(room *Room, pos PB.Pos) bool {
+func isPosValid(room *Room, pos *gamepb.Point) bool {
 	res := true
 	if pos.X < 0 || pos.X >= 15 {
 		res = false
@@ -360,10 +356,8 @@ func PlayerLogin(params ...interface{}) {
 	param := params[0].(NotifySystem.NotifyRoleLoginParam)
 	if room, ok := RoomOpenIdMap.Load(param.OpenId); ok {
 		if user := UserSystem.GetPlayerByOpenId(param.OpenId); user != nil {
-			res, _ := json.Marshal(&PB.ChessStepAck{
-				Id:        1302,
-				ErrorCode: "SUCCESS",
-				Steps:     room.(*Room).ChessStepList,
+			res, _ := proto.Marshal(&gamepb.S2CStep{
+				GobangInfo: &gamepb.GobangInfo{ChessSteps: room.(*Room).ChessStepList},
 			})
 			user.SendChannel <- res
 		}

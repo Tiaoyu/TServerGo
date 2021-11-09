@@ -2,9 +2,10 @@ package MatchSystem
 
 import (
 	"TServerGo/TServer/NotifySystem"
-	"TServerGo/TServer/PB"
 	"TServerGo/TServer/RoomSystem"
 	"TServerGo/TServer/UserSystem"
+	gamepb "TServerGo/pb"
+	"github.com/golang/protobuf/proto"
 	"log"
 	"sync"
 	"time"
@@ -40,10 +41,10 @@ func init() {
 				matchMap.Delete(item.OpenId)
 				// 返回取消匹配成功
 				if player := UserSystem.GetPlayerByOpenId(item.OpenId); player != nil {
-					player.SendChannel <- PB.ToJsonBytes(&PB.MatchAck{
-						Id:        1202,
-						ErrorCode: "CANCEL",
+					tmp, _ := proto.Marshal(&gamepb.S2CMatch{
+						Result: gamepb.MatchResult_MatResultCancel,
 					})
+					player.SendChannel <- tmp
 				}
 			}
 
@@ -53,8 +54,8 @@ func init() {
 					RedId:         pair[0].OpenId,
 					BlackId:       pair[1].OpenId,
 					CreateTime:    time.Now().Unix(),
-					ChessStepList: make([]PB.ChessStep, 0),
-					GobangInfo:    [15][15]int{},
+					ChessStepList: make([]*gamepb.ChessStep, 0),
+					GobangInfo:    [15][15]int32{},
 					TurnId:        pair[0].OpenId,
 					GoBangTemp:    [15][15]*RoomSystem.Piece{},
 				}
