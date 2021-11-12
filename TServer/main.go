@@ -3,6 +3,7 @@ package main
 import (
 	logger "TServerGo/Log"
 	pbhandler "TServerGo/TServer/PBHandler"
+	"TServerGo/TServer/constants"
 	"TServerGo/TServer/dbproxy"
 	"encoding/binary"
 	"errors"
@@ -39,12 +40,13 @@ func main() {
 		return
 	}
 
+	// socket accept
 	for {
 		conn, err := ln.AcceptTCP()
 		if err != nil {
 			logger.Errorf("net accept error, err: %v", err)
 		}
-		conn.SetReadBuffer(1024)
+		conn.SetReadBuffer(constants.SocketReadBufferSize)
 		conn.SetWriteBuffer(1024)
 		conn.SetNoDelay(true)
 		go handlerConnect(conn)
