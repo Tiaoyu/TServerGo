@@ -11,13 +11,12 @@ import (
 
 // Player 玩家数据
 type Player struct {
-	OpenId      string
-	NickName    string
-	AvatarUrl   string
-	RemoteAddr  string
-	SessionKey  string
-	SendChannel chan []byte
-	Sess        *Sessionx.Session
+	OpenId     string
+	NickName   string
+	AvatarUrl  string
+	RemoteAddr string
+	SessionKey string
+	Sess       *Sessionx.Session
 }
 
 var (

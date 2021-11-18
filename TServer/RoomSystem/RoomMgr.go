@@ -9,9 +9,9 @@ import (
 	"TServerGo/TServer/NotifySystem"
 	"TServerGo/TServer/UserSystem"
 	"TServerGo/TServer/dbproxy"
+	"TServerGo/TServer/pbsend"
 	gamepb "TServerGo/pb"
 	"encoding/json"
-	"github.com/golang/protobuf/proto"
 	"log"
 	"sync"
 	"time"
@@ -59,20 +59,20 @@ func RoomLogic(room *Room) error {
 	}
 
 	//分别给红方、黑方发送对手 消息
-	res, _ := proto.Marshal(&gamepb.S2CMatch{
+	res := pbsend.SendMsg(&gamepb.S2CMatch{
 		EnemyName:      blackPlayer.NickName,
 		EnemyAvatarUrl: blackPlayer.AvatarUrl,
 		Color:          gamepb.ColorType_ColorTypeBlack,
 		Result:         gamepb.MatchResult_MatResultSuccess,
-	})
-	redPlayer.SendChannel <- res
-	res, _ = proto.Marshal(&gamepb.S2CMatch{
+	}, gamepb.ProtocolType_ES2CMatch)
+	redPlayer.Sess.SendChannel <- res
+	res = pbsend.SendMsg(&gamepb.S2CMatch{
 		EnemyName:      redPlayer.NickName,
 		EnemyAvatarUrl: redPlayer.AvatarUrl,
 		Color:          gamepb.ColorType_ColorTypeBlack,
 		Result:         gamepb.MatchResult_MatResultSuccess,
-	})
-	blackPlayer.SendChannel <- res
+	}, gamepb.ProtocolType_ES2CMatch)
+	blackPlayer.Sess.SendChannel <- res
 
 	// 加入房间管理
 	RoomOpenIdMap.Store(room.RedId, room)
@@ -122,37 +122,37 @@ func RoomLogic(room *Room) error {
 
 					// 更新棋盘数据
 					updateGobangTemp(room, step.Point.X, step.Point.Y)
-					res, _ := proto.Marshal(&gamepb.S2CStep{
+					res := pbsend.SendMsg(&gamepb.S2CStep{
 						Error: nil,
 						GobangInfo: &gamepb.GobangInfo{
 							ChessSteps: room.ChessStepList,
 						},
-					})
+					}, gamepb.ProtocolType_ES2CStep)
 					if user := UserSystem.GetPlayerByOpenId(room.RedId); user != nil {
-						user.SendChannel <- res
+						user.Sess.SendChannel <- res
 						redPlayer = user
 					}
 					if user := UserSystem.GetPlayerByOpenId(room.BlackId); user != nil {
-						user.SendChannel <- res
+						user.Sess.SendChannel <- res
 						blackPlayer = user
 					}
 
 					// 判断胜负
 					winId, isWin := WhoWin(room)
 					if isWin {
-						wRes, _ := proto.Marshal(&gamepb.S2CGameResult{
+						wRes := pbsend.SendMsg(&gamepb.S2CGameResult{
 							Result: gamepb.GameResult_GameResultWin,
-						})
-						lRes, _ := json.Marshal(&gamepb.S2CGameResult{
+						}, gamepb.ProtocolType_ES2CGameResult)
+						lRes := pbsend.SendMsg(&gamepb.S2CGameResult{
 							Result: gamepb.GameResult_GameResultFail,
-						})
+						}, gamepb.ProtocolType_ES2CGameResult)
 
 						if winId == redPlayer.OpenId {
-							redPlayer.SendChannel <- wRes
-							blackPlayer.SendChannel <- lRes
+							redPlayer.Sess.SendChannel <- wRes
+							blackPlayer.Sess.SendChannel <- lRes
 						} else if winId == blackPlayer.OpenId {
-							blackPlayer.SendChannel <- wRes
-							redPlayer.SendChannel <- lRes
+							blackPlayer.Sess.SendChannel <- wRes
+							redPlayer.Sess.SendChannel <- lRes
 						}
 						// 存储胜负数据
 						dbproxy.Instance().Transaction(func(session *xorm.Session) (interface{}, error) {
@@ -356,10 +356,10 @@ func PlayerLogin(params ...interface{}) {
 	param := params[0].(NotifySystem.NotifyRoleLoginParam)
 	if room, ok := RoomOpenIdMap.Load(param.OpenId); ok {
 		if user := UserSystem.GetPlayerByOpenId(param.OpenId); user != nil {
-			res, _ := proto.Marshal(&gamepb.S2CStep{
+			res := pbsend.SendMsg(&gamepb.S2CStep{
 				GobangInfo: &gamepb.GobangInfo{ChessSteps: room.(*Room).ChessStepList},
-			})
-			user.SendChannel <- res
+			}, gamepb.ProtocolType_ES2CStep)
+			user.Sess.SendChannel <- res
 		}
 	}
 }

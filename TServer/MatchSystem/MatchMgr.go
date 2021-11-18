@@ -4,8 +4,8 @@ import (
 	"TServerGo/TServer/NotifySystem"
 	"TServerGo/TServer/RoomSystem"
 	"TServerGo/TServer/UserSystem"
+	"TServerGo/TServer/pbsend"
 	gamepb "TServerGo/pb"
-	"github.com/golang/protobuf/proto"
 	"log"
 	"sync"
 	"time"
@@ -41,10 +41,10 @@ func init() {
 				matchMap.Delete(item.OpenId)
 				// 返回取消匹配成功
 				if player := UserSystem.GetPlayerByOpenId(item.OpenId); player != nil {
-					tmp, _ := proto.Marshal(&gamepb.S2CMatch{
+					tmp := pbsend.SendMsg(&gamepb.S2CMatch{
 						Result: gamepb.MatchResult_MatResultCancel,
-					})
-					player.SendChannel <- tmp
+					}, gamepb.ProtocolType_ES2CMatch)
+					player.Sess.SendChannel <- tmp
 				}
 			}
 

@@ -95,9 +95,9 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 				return nil, nil
 			}
 			sess = &Sessionx.Session{
-				Conn:       connectInfo.SOCKET,
-				RemoteAttr: connectInfo.SOCKET.RemoteAddr().String(),
-				SendBuffer: make(chan []byte),
+				Conn:        connectInfo.SOCKET,
+				RemoteAttr:  connectInfo.SOCKET.RemoteAddr().String(),
+				SendChannel: make(chan []byte),
 			}
 			h.sess = sess
 			go SendLoop(sess)
@@ -115,7 +115,7 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 		binary.BigEndian.PutUint32(bufHead, uint32(len(ack)+4))
 		bufHead = append(bufHead, bufPId...)
 		bufHead = append(bufHead, ack...)
-		h.sess.SendBuffer <- bufHead
+		h.sess.SendChannel <- bufHead
 	}
 	return nil, nil
 }
@@ -123,7 +123,7 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 func SendLoop(sess *Sessionx.Session) {
 	for {
 		select {
-		case msg, ok := <-sess.SendBuffer:
+		case msg, ok := <-sess.SendChannel:
 			if !ok {
 				continue
 			}
@@ -142,12 +142,11 @@ func OnLogin(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
 	logger.Debugf("Recv msg:%v", req)
 
 	player := &UserSystem.Player{
-		OpenId:      req.NickName,
-		NickName:    req.NickName,
-		AvatarUrl:   req.AvatarUrl,
-		RemoteAddr:  sess.RemoteAttr,
-		SendChannel: make(chan []byte),
-		Sess:        sess,
+		OpenId:     req.NickName,
+		NickName:   req.NickName,
+		AvatarUrl:  req.AvatarUrl,
+		RemoteAddr: sess.RemoteAttr,
+		Sess:       sess,
 	}
 	UserSystem.PlayerLogin(player)
 
