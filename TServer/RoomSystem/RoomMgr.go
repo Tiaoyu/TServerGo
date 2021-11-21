@@ -69,7 +69,7 @@ func RoomLogic(room *Room) error {
 	res = pbsend.SendMsg(&gamepb.S2CMatch{
 		EnemyName:      redPlayer.NickName,
 		EnemyAvatarUrl: redPlayer.AvatarUrl,
-		Color:          gamepb.ColorType_ColorTypeBlack,
+		Color:          gamepb.ColorType_ColorTypeRed,
 		Result:         gamepb.MatchResult_MatResultSuccess,
 	}, gamepb.ProtocolType_ES2CMatch)
 	blackPlayer.Sess.SendChannel <- res

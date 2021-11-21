@@ -6,11 +6,12 @@ import (
 	"TServerGo/TServer/RoomSystem"
 	"TServerGo/TServer/Sessionx"
 	"TServerGo/TServer/UserSystem"
-	"TServerGo/pb"
+	gamepb "TServerGo/pb"
 	"encoding/binary"
 	"errors"
-	"github.com/golang/protobuf/proto"
 	"log"
+
+	"github.com/golang/protobuf/proto"
 )
 
 var (
@@ -108,7 +109,9 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 		}
 
 		ack, ackPId, _ := call(h.sess, msg[4:])
-
+		if ack == nil {
+			return nil, nil
+		}
 		var bufHead = make([]byte, 4)
 		var bufPId = make([]byte, 4)
 		binary.BigEndian.PutUint32(bufPId, ackPId)
@@ -223,9 +226,9 @@ func OnStep(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
 		Point: req.Point,
 	}
 
-	ack, _ := proto.Marshal(&gamepb.S2CStep{
-		Error:      nil,
-		GobangInfo: nil,
-	})
-	return ack, uint32(gamepb.ProtocolType_ES2CStep), nil
+	// ack, _ := proto.Marshal(&gamepb.S2CStep{
+	// 	Error:      nil,
+	// 	GobangInfo: nil,
+	// })
+	return nil, uint32(gamepb.ProtocolType_ES2CStep), nil
 }
