@@ -208,6 +208,7 @@ func OnStep(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
 	value, ok := RoomSystem.RoomOpenIdMap.Load(player.OpenId)
 	if !ok {
 		log.Println("room is nil, OpenId:", player.OpenId)
+		return nil, 0, nil
 	}
 	room := value.(*RoomSystem.Room)
 	if room.TurnId != player.OpenId {
