@@ -29,7 +29,7 @@ func main() {
 
 	// tcp服务初始化
 	logger.Debug("init tcp...")
-	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8081")
+	addr, err := net.ResolveTCPAddr("tcp", ":8081")
 	if err != nil {
 		logger.Errorf("resolve tcp addr error, err:%v", err)
 	}
