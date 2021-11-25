@@ -154,7 +154,7 @@ func OnLogin(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
 	UserSystem.PlayerLogin(player)
 
 	ack, _ := proto.Marshal(&gamepb.S2CLogin{ErrorCode: "success"})
-	return ack, uint32(gamepb.ProtocolType_ES2CPing), nil
+	return ack, uint32(gamepb.ProtocolType_ES2CLogin), nil
 }
 
 func OnPing(sess *Sessionx.Session, msg []byte) ([]byte, uint32, error) {
