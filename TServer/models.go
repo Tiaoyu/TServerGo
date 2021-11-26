@@ -1,4 +1,4 @@
-package dbproxy
+package main
 
 // User 账号
 type User struct {

@@ -1,4 +1,4 @@
-package Sessionx
+package main
 
 import "net"
 

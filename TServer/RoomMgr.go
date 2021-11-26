@@ -3,13 +3,9 @@
 //有足够角色后进行创建房间
 //创建完房间后开始进入房间线程
 
-package RoomSystem
+package main
 
 import (
-	"TServerGo/TServer/NotifySystem"
-	"TServerGo/TServer/UserSystem"
-	"TServerGo/TServer/dbproxy"
-	"TServerGo/TServer/pbsend"
 	gamepb "TServerGo/pb"
 	"encoding/json"
 	"log"
@@ -43,30 +39,30 @@ var (
 )
 
 func init() {
-	NotifySystem.NotifyRegister(NotifySystem.NotifyTypeRoleLoginIn, PlayerLogin)
+	NotifyRegister(NotifyTypeRoleLoginIn, onRoomPlayerLogin)
 }
 
 // RoomLogic 房间逻辑
 func RoomLogic(room *Room) error {
 	//获取红方、黑方玩家
-	redPlayer, ok := UserSystem.PlayerOpenIdMap[room.RedId]
+	redPlayer, ok := PlayerOpenIdMap[room.RedId]
 	if !ok {
 		return nil
 	}
-	blackPlayer, ok := UserSystem.PlayerOpenIdMap[room.BlackId]
+	blackPlayer, ok := PlayerOpenIdMap[room.BlackId]
 	if !ok {
 		return nil
 	}
 
 	//分别给红方、黑方发送对手 消息
-	res := pbsend.SendMsg(&gamepb.S2CMatch{
+	res := SendMsg(&gamepb.S2CMatch{
 		EnemyName:      blackPlayer.NickName,
 		EnemyAvatarUrl: blackPlayer.AvatarUrl,
 		Color:          gamepb.ColorType_ColorTypeBlack,
 		Result:         gamepb.MatchResult_MatResultSuccess,
 	}, gamepb.ProtocolType_ES2CMatch)
 	redPlayer.Sess.SendChannel <- res
-	res = pbsend.SendMsg(&gamepb.S2CMatch{
+	res = SendMsg(&gamepb.S2CMatch{
 		EnemyName:      redPlayer.NickName,
 		EnemyAvatarUrl: redPlayer.AvatarUrl,
 		Color:          gamepb.ColorType_ColorTypeRed,
@@ -77,7 +73,7 @@ func RoomLogic(room *Room) error {
 	// 加入房间管理
 	RoomOpenIdMap.Store(room.RedId, room)
 	RoomOpenIdMap.Store(room.BlackId, room)
-	room.MsgChannel = make(chan *gamepb.ChessStep, 0)
+	room.MsgChannel = make(chan *gamepb.ChessStep)
 	room.CreateTime = time.Now().Unix()
 	go func() {
 		d := time.Duration(time.Second * 2)
@@ -92,7 +88,6 @@ func RoomLogic(room *Room) error {
 					log.Printf("Room is time out, so it will be destroyed! Names:%v-%v", redPlayer.NickName, blackPlayer.NickName)
 					finished = true
 				}
-				break
 			case step := <-room.MsgChannel:
 				{
 					if !isPosValid(room, step.Point) {
@@ -122,17 +117,17 @@ func RoomLogic(room *Room) error {
 
 					// 更新棋盘数据
 					updateGobangTemp(room, step.Point.X, step.Point.Y)
-					res := pbsend.SendMsg(&gamepb.S2CStep{
+					res := SendMsg(&gamepb.S2CStep{
 						Error: nil,
 						GobangInfo: &gamepb.GobangInfo{
 							ChessSteps: room.ChessStepList,
 						},
 					}, gamepb.ProtocolType_ES2CStep)
-					if user := UserSystem.GetPlayerByOpenId(room.RedId); user != nil {
+					if user := GetPlayerByOpenId(room.RedId); user != nil {
 						user.Sess.SendChannel <- res
 						redPlayer = user
 					}
-					if user := UserSystem.GetPlayerByOpenId(room.BlackId); user != nil {
+					if user := GetPlayerByOpenId(room.BlackId); user != nil {
 						user.Sess.SendChannel <- res
 						blackPlayer = user
 					}
@@ -140,10 +135,10 @@ func RoomLogic(room *Room) error {
 					// 判断胜负
 					winId, isWin := WhoWin(room)
 					if isWin {
-						wRes := pbsend.SendMsg(&gamepb.S2CGameResult{
+						wRes := SendMsg(&gamepb.S2CGameResult{
 							Result: gamepb.GameResult_GameResultWin,
 						}, gamepb.ProtocolType_ES2CGameResult)
-						lRes := pbsend.SendMsg(&gamepb.S2CGameResult{
+						lRes := SendMsg(&gamepb.S2CGameResult{
 							Result: gamepb.GameResult_GameResultFail,
 						}, gamepb.ProtocolType_ES2CGameResult)
 
@@ -155,9 +150,9 @@ func RoomLogic(room *Room) error {
 							redPlayer.Sess.SendChannel <- lRes
 						}
 						// 存储胜负数据
-						dbproxy.Instance().Transaction(func(session *xorm.Session) (interface{}, error) {
-							rUser := &dbproxy.User{}
-							bUser := &dbproxy.User{}
+						dbProxy.Transaction(func(session *xorm.Session) (interface{}, error) {
+							rUser := &User{}
+							bUser := &User{}
 							session.Where("open_id = ?", redPlayer.OpenId).Get(rUser)
 							session.Where("open_id = ?", blackPlayer.OpenId).Get(bUser)
 							if winId == redPlayer.OpenId {
@@ -173,7 +168,7 @@ func RoomLogic(room *Room) error {
 							}
 							session.Where("open_id = ?", redPlayer.OpenId).Update(rUser)
 							session.Where("open_id = ?", blackPlayer.OpenId).Update(bUser)
-							race := &dbproxy.Race{
+							race := &Race{
 								RedOpenId:   redPlayer.OpenId,
 								BlackOpenId: blackPlayer.OpenId,
 								WinnerId:    winId,
@@ -187,7 +182,6 @@ func RoomLogic(room *Room) error {
 						finished = true
 					}
 				}
-				break
 			}
 			if finished {
 				RoomOpenIdMap.Delete(room.RedId)
@@ -352,11 +346,11 @@ func updateGobangTemp(room *Room, x, y int32) (isWin bool) {
 	return isWin
 }
 
-func PlayerLogin(params ...interface{}) {
-	param := params[0].(NotifySystem.NotifyRoleLoginParam)
+func onRoomPlayerLogin(params ...interface{}) {
+	param := params[0].(NotifyRoleLoginParam)
 	if room, ok := RoomOpenIdMap.Load(param.OpenId); ok {
-		if user := UserSystem.GetPlayerByOpenId(param.OpenId); user != nil {
-			res := pbsend.SendMsg(&gamepb.S2CStep{
+		if user := GetPlayerByOpenId(param.OpenId); user != nil {
+			res := SendMsg(&gamepb.S2CStep{
 				GobangInfo: &gamepb.GobangInfo{ChessSteps: room.(*Room).ChessStepList},
 			}, gamepb.ProtocolType_ES2CStep)
 			user.Sess.SendChannel <- res

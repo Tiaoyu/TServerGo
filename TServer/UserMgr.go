@@ -1,11 +1,9 @@
-package UserSystem
+package main
 
 import (
-	"TServerGo/TServer/NotifySystem"
-	"TServerGo/TServer/Sessionx"
-	"TServerGo/TServer/dbproxy"
 	"fmt"
 	"log"
+
 	"xorm.io/xorm"
 )
 
@@ -16,7 +14,7 @@ type Player struct {
 	AvatarUrl  string
 	RemoteAddr string
 	SessionKey string
-	Sess       *Sessionx.Session
+	Sess       *Session
 }
 
 var (
@@ -25,7 +23,7 @@ var (
 )
 
 func init() {
-	NotifySystem.NotifyRegister(NotifySystem.NotifyTypeRoleLogout, PlayerLogout)
+	NotifyRegister(NotifyTypeRoleLogout, onPlayerLogout)
 }
 
 func PlayerLogin(u *Player) {
@@ -41,7 +39,7 @@ func PlayerLogin(u *Player) {
 	}
 
 	fun := func(session *xorm.Session) (interface{}, error) {
-		user := &dbproxy.User{}
+		user := &User{}
 		has, err := session.Where("open_id=?", u.OpenId).Get(user)
 		if err != nil || !has {
 			user.UserName = u.NickName
@@ -58,21 +56,21 @@ func PlayerLogin(u *Player) {
 		return nil, err
 	}
 	// 登陆成功后 需要更新数据库
-	_, err := dbproxy.Instance().Transaction(fun)
+	_, err := dbProxy.Transaction(fun)
 	if err != nil {
 		log.Printf("Login failed! OpenId:%v NickName:%v Error:%v\n", u.OpenId, u.NickName, err)
 	}
 
 	log.Printf("%v login success, OpenId:%v RemoteAddr:%v", u.NickName, u.OpenId, u.RemoteAddr)
 
-	NotifySystem.NotifyExec(NotifySystem.NotifyTypeRoleLoginIn, NotifySystem.NotifyRoleLoginParam{
+	NotifyExec(NotifyTypeRoleLoginIn, NotifyRoleLoginParam{
 		OpenId:     u.OpenId,
 		RemoteAddr: u.RemoteAddr,
 	})
 }
 
-func PlayerLogout(params ...interface{}) {
-	param := params[0].(NotifySystem.NotifyRoleLogoutParam)
+func onPlayerLogout(params ...interface{}) {
+	param := params[0].(NotifyRoleLogoutParam)
 	if tmp, ok := PlayerRemoteMap[param.RemoteAddr]; ok {
 		delete(PlayerRemoteMap, tmp.RemoteAddr)
 		delete(PlayerOpenIdMap, tmp.OpenId)

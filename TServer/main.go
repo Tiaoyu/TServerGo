@@ -1,10 +1,7 @@
 package main
 
 import (
-	logger "TServerGo/Log"
-	pbhandler "TServerGo/TServer/PBHandler"
-	"TServerGo/TServer/constants"
-	"TServerGo/TServer/dbproxy"
+	logger "TServerGo/log"
 	"encoding/binary"
 	"errors"
 	"flag"
@@ -15,7 +12,7 @@ import (
 var (
 	Mysql     = flag.String("MYSQL", "", "please set mysql")
 	MysqlHost = flag.String("MYSQL_HOST", "", "please set mysql host")
-	connMap   = make(map[string]*pbhandler.ConnectInfo)
+	connMap   = make(map[string]*ConnectInfo)
 )
 
 func main() {
@@ -23,7 +20,7 @@ func main() {
 	flag.Parse()
 
 	// 数据库初始化
-	db := dbproxy.Instance()
+	db := dbProxy
 	db.Init(*Mysql, *MysqlHost)
 	db.Sync()
 
@@ -46,8 +43,8 @@ func main() {
 		if err != nil {
 			logger.Errorf("net accept error, err: %v", err)
 		}
-		conn.SetReadBuffer(constants.SocketReadBufferSize)
-		conn.SetWriteBuffer(1024)
+		conn.SetReadBuffer(SocketReadBufferSize)
+		conn.SetWriteBuffer(SocketSendBufferSize)
 		conn.SetNoDelay(true)
 		go handlerConnect(conn)
 	}
@@ -58,11 +55,11 @@ func handlerConnect(conn net.Conn) {
 	logger.Debugf("Connected, Addr:%v", conn.RemoteAddr())
 	connectInfo, ok := connMap[conn.RemoteAddr().String()]
 	if !ok {
-		connectInfo = &pbhandler.ConnectInfo{
+		connectInfo = &ConnectInfo{
 			SOCKET: conn,
 		}
 	}
-	handler := &pbhandler.HandlerProtobuf{}
+	handler := &HandlerProtobuf{}
 	pLen := make([]byte, 4)
 	for {
 		_, err := io.ReadFull(conn, pLen)
@@ -70,8 +67,7 @@ func handlerConnect(conn net.Conn) {
 			logger.Errorf("net error, err:%v", err)
 			break
 		}
-		var len uint32
-		len = binary.BigEndian.Uint32(pLen)
+		len := binary.BigEndian.Uint32(pLen)
 		if len < 4 {
 			logger.Errorf("net error, err:%v", errors.New("protocol len is invalid"))
 			break
@@ -83,14 +79,5 @@ func handlerConnect(conn net.Conn) {
 			break
 		}
 		handler.ParsePB(connectInfo, msg)
-		//
-		//msg = make([]byte, 1024)
-		//len, err = conn.Read(msg)
-		//if err != nil || len == 0 {
-		//	logger.Errorf("net error, err:%v", err)
-		//	break
-		//}
-		//logger.Debugf("Recv msg, len:%v msg:%v", len, msg[:len])
-		//handler.HandlerPB(connectInfo, msg[:len])
 	}
 }

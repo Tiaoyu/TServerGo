@@ -1,4 +1,4 @@
-package constants
+package main
 
 const (
 	SocketSendBufferSize = 1024

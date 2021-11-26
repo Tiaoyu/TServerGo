@@ -1,4 +1,4 @@
-package dbproxy
+package main
 
 import (
 	"log"
@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	instance *DBProxy
+	dbProxy *DBProxy
 )
 
 type DBProxy struct {
@@ -19,10 +19,7 @@ type DBProxy struct {
 }
 
 func init() {
-	instance = &DBProxy{}
-}
-func Instance() *DBProxy {
-	return instance
+	dbProxy = &DBProxy{}
 }
 
 func (db *DBProxy) Init(driverName, dataSourceName string) {

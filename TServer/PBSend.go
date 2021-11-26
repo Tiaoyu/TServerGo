@@ -1,8 +1,9 @@
-package pbsend
+package main
 
 import (
 	gamepb "TServerGo/pb"
 	"encoding/binary"
+
 	"github.com/golang/protobuf/proto"
 )
 
