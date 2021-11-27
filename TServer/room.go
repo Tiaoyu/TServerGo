@@ -38,7 +38,7 @@ var (
 	RoomOpenIdMap = new(sync.Map)
 )
 
-func init() {
+func initRoom() {
 	NotifyRegister(NotifyTypeRoleLoginIn, onRoomPlayerLogin)
 }
 

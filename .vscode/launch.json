@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "TServer",
+            "name": "tserver",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "TServer",
+            "program": "tserver",
             "args": [
                 "-MYSQL",
                 "mysql",

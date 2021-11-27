@@ -36,7 +36,11 @@ func main() {
 		logger.Errorf("net error, err: %v", err)
 		return
 	}
-
+	// init notify
+	initNotify()
+	initMatch()
+	initRoom()
+	initUser()
 	// socket accept
 	for {
 		conn, err := ln.AcceptTCP()

@@ -22,7 +22,7 @@ var (
 	PlayerRemoteMap = make(map[string]*Player)
 )
 
-func init() {
+func initUser() {
 	NotifyRegister(NotifyTypeRoleLogout, onPlayerLogout)
 }
 

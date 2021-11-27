@@ -16,7 +16,7 @@ var (
 	NotifyMap map[NotifyType][]func(...interface{})
 )
 
-func init() {
+func initNotify() {
 	NotifyMap = make(map[NotifyType][]func(...interface{}))
 	NotifyMap[NotifyTypeRoleLogout] = []func(...interface{}){}
 	NotifyMap[NotifyTypeRoleLoginIn] = []func(...interface{}){}

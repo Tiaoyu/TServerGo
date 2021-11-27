@@ -7,7 +7,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -121,13 +121,11 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 
 func SendLoop(sess *Session) {
 	for {
-		select {
-		case msg, ok := <-sess.SendChannel:
-			if !ok {
-				continue
-			}
-			sess.Send(msg)
+		msg, ok := <-sess.SendChannel
+		if !ok {
+			continue
 		}
+		sess.Send(msg)
 	}
 }
 

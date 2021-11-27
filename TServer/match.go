@@ -18,7 +18,7 @@ type MatchItem struct {
 	RemoteAddr string
 }
 
-func init() {
+func initMatch() {
 	// 匹配线程
 	go func() {
 		pair := make([]*MatchItem, 0)

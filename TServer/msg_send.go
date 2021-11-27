@@ -4,7 +4,7 @@ import (
 	gamepb "TServerGo/pb"
 	"encoding/binary"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 func SendMsg(message proto.Message, t gamepb.ProtocolType) []byte {
