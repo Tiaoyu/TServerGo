@@ -6,9 +6,9 @@
 package main
 
 import (
+	logger "TServerGo/log"
 	gamepb "TServerGo/pb"
 	"encoding/json"
-	"log"
 	"sync"
 	"time"
 
@@ -85,16 +85,16 @@ func RoomLogic(room *Room) error {
 			case <-t.C:
 				t.Reset(time.Second * 2)
 				if time.Now().Unix()-room.CreateTime > 3600 {
-					log.Printf("Room is time out, so it will be destroyed! Names:%v-%v", redPlayer.NickName, blackPlayer.NickName)
+					logger.Debugf("Room is time out, so it will be destroyed! Names:%v-%v", redPlayer.NickName, blackPlayer.NickName)
 					finished = true
 				}
 			case step := <-room.MsgChannel:
 				{
 					if !isPosValid(room, step.Point) {
-						log.Printf("%v step to an wrong pos (%v)\n", step.Point.Camp, step.Point)
+						logger.Debugf("%v step to an wrong pos (%v)", step.Point.Camp, step.Point)
 						continue
 					}
-					log.Println(step.Point.Camp, " step to ", step.Point)
+					logger.Debugf("%v step to %v", step.Point.Camp, step.Point)
 					room.GobangInfo[step.Point.X][step.Point.Y] = step.Point.Camp
 					room.ChessStepList = append(room.ChessStepList, step)
 					// 当前位置没人下过则创建一步棋
@@ -186,12 +186,12 @@ func RoomLogic(room *Room) error {
 			if finished {
 				RoomOpenIdMap.Delete(room.RedId)
 				RoomOpenIdMap.Delete(room.BlackId)
-				log.Printf("room destroyed! Red:%v Black:%v\n", redPlayer.NickName, blackPlayer.NickName)
+				logger.Debugf("room destroyed! Red:%v Black:%v", redPlayer.NickName, blackPlayer.NickName)
 				break
 			}
 		}
 	}()
-	log.Println("create room success, RedId:", room.RedId, " BlackId:", room.BlackId)
+	logger.Debugf("create room success, RedId:%v, BlackId:%v", room.RedId, room.BlackId)
 	return nil
 }
 
