@@ -25,10 +25,11 @@ func main() {
 	db.Sync()
 
 	// tcp服务初始化
-	logger.Debug("init tcp...")
+	logger.Info("init tcp...")
 	addr, err := net.ResolveTCPAddr("tcp", ":8081")
 	if err != nil {
 		logger.Errorf("resolve tcp addr error, err:%v", err)
+		return
 	}
 
 	ln, err := net.ListenTCP("tcp", addr)
@@ -41,6 +42,7 @@ func main() {
 	initMatch()
 	initRoom()
 	initUser()
+
 	// socket accept
 	for {
 		conn, err := ln.AcceptTCP()
@@ -68,18 +70,19 @@ func handlerConnect(conn net.Conn) {
 	for {
 		_, err := io.ReadFull(conn, pLen)
 		if err != nil {
-			logger.Errorf("net error, err:%v", err)
+			logger.Errorf("net error on ReadFull pbLen, err:%v", err)
+			handler.Error()
 			break
 		}
 		len := binary.BigEndian.Uint32(pLen)
 		if len < 4 {
-			logger.Errorf("net error, err:%v", errors.New("protocol len is invalid"))
+			logger.Errorf("net error on PBLen, err:%v", errors.New("protocol len is invalid"))
 			break
 		}
 		msg := make([]byte, len)
 		_, err = io.ReadFull(conn, msg)
 		if err != nil {
-			logger.Errorf("net error, err:%v", err)
+			logger.Errorf("net error on ReadFull msg, err:%v", err)
 			break
 		}
 		handler.ParsePB(connectInfo, msg)

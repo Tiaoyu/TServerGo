@@ -79,4 +79,9 @@ message S2CStep {
 message S2CGameResult {
     GameResult result = 1;
 }
+
+// 推送消息
+message S2CPushMessage{
+    string msg = 1;
+}
 //==========================//

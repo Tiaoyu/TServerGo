@@ -1,6 +1,7 @@
 package main
 
 import (
+	logger "TServerGo/log"
 	gamepb "TServerGo/pb"
 	"log"
 	"sync"
@@ -26,7 +27,7 @@ func initMatch() {
 			select {
 			case item := <-matchPool:
 				pair = append(pair, item)
-				log.Printf("Join match queue success! OpenId:%v\n", item.OpenId)
+				logger.Debugf("Join match queue success! OpenId:%v", item.OpenId)
 			case item := <-cancelPool:
 				for i, p := range pair {
 					if p.OpenId == item.OpenId {
@@ -59,7 +60,7 @@ func initMatch() {
 				matchMap.Delete(pair[1].OpenId)
 				RoomLogic(room)
 				pair = make([]*MatchItem, 0)
-				log.Printf("Match success! %v vs %v\n", room.RedId, room.BlackId)
+				logger.Debugf("Match success! %v vs %v", room.RedId, room.BlackId)
 			}
 		}
 	}()
@@ -104,7 +105,7 @@ func CancelMatchById(openId, remoteAddr string) {
 }
 
 func onMatchPlayerLogout(params ...interface{}) {
-	param := params[0].(NotifyRoleLogoutParam)
+	param := params[0].(*NotifyRoleLogoutParam)
 	if _, ok := matchMap.Load(param.OpenId); ok {
 		CancelMatchById(param.OpenId, param.RemoteAddr)
 	}

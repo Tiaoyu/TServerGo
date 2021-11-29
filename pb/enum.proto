@@ -19,6 +19,7 @@ enum ProtocolType {
     EC2SStep = 6;
     ES2CStep = 7;
     ES2CGameResult = 8;
+    ES2CPushMsg = 9;
 }
 
 // 匹配类型

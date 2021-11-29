@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	pbMap map[gamepb.ProtocolType]func(sess *Session, msg []byte) ([]byte, uint32, error)
+	pbMap map[gamepb.ProtocolType]func(sess *UserSession, msg []byte) ([]byte, uint32, error)
 )
 
 func init() {
-	pbMap = make(map[gamepb.ProtocolType]func(sess *Session, msg []byte) ([]byte, uint32, error))
+	pbMap = make(map[gamepb.ProtocolType]func(sess *UserSession, msg []byte) ([]byte, uint32, error))
 	pbMap[gamepb.ProtocolType_EC2SPing] = OnPing
 	pbMap[gamepb.ProtocolType_EC2SLogin] = OnLogin
 	pbMap[gamepb.ProtocolType_EC2SMatch] = OnMatch
@@ -24,7 +24,14 @@ func init() {
 }
 
 type HandlerProtobuf struct {
-	sess *Session
+	sess *UserSession
+}
+
+func (h *HandlerProtobuf) Error() {
+	if h.sess != nil {
+		h.sess.Close()
+		NotifyExec(NotifyTypeRoleLogout, &NotifyRoleLogoutParam{OpenId: h.sess.OpenId, RemoteAddr: h.sess.RemoteAttr})
+	}
 }
 
 func (h *HandlerProtobuf) HandlerPB(ws *ConnectInfo, msg []byte) ([]byte, error) {
@@ -85,13 +92,13 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 		}
 
 		// 登陆
-		var sess *Session
+		var sess *UserSession
 		if protoId == uint32(gamepb.ProtocolType_EC2SLogin) {
 			if h.sess != nil {
 				logger.Errorf("repeat login error")
 				return nil, nil
 			}
-			sess = &Session{
+			sess = &UserSession{
 				Conn:        connectInfo.SOCKET,
 				RemoteAttr:  connectInfo.SOCKET.RemoteAddr().String(),
 				SendChannel: make(chan []byte),
@@ -119,7 +126,7 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 	return nil, nil
 }
 
-func SendLoop(sess *Session) {
+func SendLoop(sess *UserSession) {
 	for {
 		msg, ok := <-sess.SendChannel
 		if !ok {
@@ -129,11 +136,12 @@ func SendLoop(sess *Session) {
 	}
 }
 
-func OnLogin(sess *Session, msg []byte) ([]byte, uint32, error) {
+func OnLogin(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	logger.Debugf("Recv msg bytes:%v", msg)
 	req := &gamepb.C2SLogin{}
 	if err := proto.Unmarshal(msg, req); err != nil {
-		log.Fatalln("Failed to parse C2SPing:", err)
+		logger.Errorf("Failed to parse C2SPing:", err)
+		return nil, 0, err
 	}
 	logger.Debugf("Recv msg:%v", req)
 
@@ -144,17 +152,21 @@ func OnLogin(sess *Session, msg []byte) ([]byte, uint32, error) {
 		RemoteAddr: sess.RemoteAttr,
 		Sess:       sess,
 	}
-	PlayerLogin(player)
-
+	err := PlayerLogin(player)
+	if err != nil {
+		return nil, 0, err
+	}
+	sess.OpenId = player.OpenId
 	ack, _ := proto.Marshal(&gamepb.S2CLogin{ErrorCode: "success"})
 	return ack, uint32(gamepb.ProtocolType_ES2CLogin), nil
 }
 
-func OnPing(sess *Session, msg []byte) ([]byte, uint32, error) {
+func OnPing(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	logger.Debugf("Recv msg bytes:%v", msg)
 	req := &gamepb.C2SPing{}
 	if err := proto.Unmarshal(msg, req); err != nil {
-		log.Fatalln("Failed to parse C2SPing:", err)
+		logger.Errorf("Failed to parse C2SPing:", err)
+		return nil, 0, err
 	}
 	logger.Debugf("Recv msg:%v", req)
 
@@ -163,7 +175,7 @@ func OnPing(sess *Session, msg []byte) ([]byte, uint32, error) {
 	return ack, uint32(gamepb.ProtocolType_ES2CPing), nil
 }
 
-func OnMatch(sess *Session, msg []byte) ([]byte, uint32, error) {
+func OnMatch(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	req := &gamepb.C2SMatch{}
 	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Fatalln("Failed to parse C2SMatch:", err)
@@ -186,7 +198,7 @@ func OnMatch(sess *Session, msg []byte) ([]byte, uint32, error) {
 	return res, uint32(gamepb.ProtocolType_ES2CMatch), err
 }
 
-func OnStep(sess *Session, msg []byte) ([]byte, uint32, error) {
+func OnStep(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	req := &gamepb.C2SStep{}
 	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Fatalln("Failed to parse C2SStep:", err)
@@ -200,7 +212,7 @@ func OnStep(sess *Session, msg []byte) ([]byte, uint32, error) {
 	}
 	value, ok := RoomOpenIdMap.Load(player.OpenId)
 	if !ok {
-		log.Println("room is nil, OpenId:", player.OpenId)
+		logger.Debugf("room is nil, OpenId:%v", player.OpenId)
 		return nil, 0, nil
 	}
 	room := value.(*Room)
@@ -220,9 +232,5 @@ func OnStep(sess *Session, msg []byte) ([]byte, uint32, error) {
 		Point: req.Point,
 	}
 
-	// ack, _ := proto.Marshal(&gamepb.S2CStep{
-	// 	Error:      nil,
-	// 	GobangInfo: nil,
-	// })
 	return nil, uint32(gamepb.ProtocolType_ES2CStep), nil
 }

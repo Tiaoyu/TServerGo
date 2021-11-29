@@ -37,11 +37,11 @@ func NotifyExec(t NotifyType, param ...interface{}) {
 	switch t {
 	case NotifyTypeRoleLogout:
 		for _, event := range queue {
-			event(param[0].(NotifyRoleLogoutParam))
+			event(param[0].(*NotifyRoleLogoutParam))
 		}
 	case NotifyTypeRoleLoginIn:
 		for _, event := range queue {
-			event(param[0].(NotifyRoleLoginParam))
+			event(param[0].(*NotifyRoleLoginParam))
 		}
 	}
 }

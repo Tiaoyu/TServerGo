@@ -720,6 +720,54 @@ func (x *S2CGameResult) GetResult() GameResult {
 	return GameResult_GameResultDefault
 }
 
+// 推送消息
+type S2CPushMessage struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Msg string `protobuf:"bytes,1,opt,name=msg,proto3" json:"msg,omitempty"`
+}
+
+func (x *S2CPushMessage) Reset() {
+	*x = S2CPushMessage{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_game_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CPushMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CPushMessage) ProtoMessage() {}
+
+func (x *S2CPushMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CPushMessage.ProtoReflect.Descriptor instead.
+func (*S2CPushMessage) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *S2CPushMessage) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
 var File_game_proto protoreflect.FileDescriptor
 
 var file_game_proto_rawDesc = []byte{
@@ -785,10 +833,12 @@ var file_game_proto_rawDesc = []byte{
 	0x6d, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x2a, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75,
 	0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x12, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x70,
 	0x62, 0x2e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x52, 0x06, 0x72, 0x65,
-	0x73, 0x75, 0x6c, 0x74, 0x42, 0x2a, 0x0a, 0x06, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x42, 0x06,
-	0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x50, 0x01, 0x5a, 0x16, 0x74, 0x69, 0x61, 0x6f, 0x79, 0x75,
-	0x79, 0x75, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x70, 0x62, 0x2f, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x75, 0x6c, 0x74, 0x22, 0x22, 0x0a, 0x0e, 0x53, 0x32, 0x43, 0x50, 0x75, 0x73, 0x68, 0x4d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x6d, 0x73, 0x67, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x03, 0x6d, 0x73, 0x67, 0x42, 0x2a, 0x0a, 0x06, 0x67, 0x61, 0x6d, 0x65,
+	0x70, 0x62, 0x42, 0x06, 0x67, 0x61, 0x6d, 0x65, 0x70, 0x62, 0x50, 0x01, 0x5a, 0x16, 0x74, 0x69,
+	0x61, 0x6f, 0x79, 0x75, 0x79, 0x75, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x70, 0x62, 0x2f, 0x67, 0x61,
+	0x6d, 0x65, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -803,39 +853,40 @@ func file_game_proto_rawDescGZIP() []byte {
 	return file_game_proto_rawDescData
 }
 
-var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_game_proto_goTypes = []interface{}{
-	(*Error)(nil),         // 0: gamepb.Error
-	(*Point)(nil),         // 1: gamepb.Point
-	(*ChessStep)(nil),     // 2: gamepb.ChessStep
-	(*GobangInfo)(nil),    // 3: gamepb.GobangInfo
-	(*C2SPing)(nil),       // 4: gamepb.C2SPing
-	(*S2CPing)(nil),       // 5: gamepb.S2CPing
-	(*C2SLogin)(nil),      // 6: gamepb.C2SLogin
-	(*S2CLogin)(nil),      // 7: gamepb.S2CLogin
-	(*C2SMatch)(nil),      // 8: gamepb.C2SMatch
-	(*S2CMatch)(nil),      // 9: gamepb.S2CMatch
-	(*C2SStep)(nil),       // 10: gamepb.C2SStep
-	(*S2CStep)(nil),       // 11: gamepb.S2CStep
-	(*S2CGameResult)(nil), // 12: gamepb.S2CGameResult
-	(ErrorType)(0),        // 13: gamepb.ErrorType
-	(MatchType)(0),        // 14: gamepb.MatchType
-	(ColorType)(0),        // 15: gamepb.ColorType
-	(MatchResult)(0),      // 16: gamepb.MatchResult
-	(GameResult)(0),       // 17: gamepb.GameResult
+	(*Error)(nil),          // 0: gamepb.Error
+	(*Point)(nil),          // 1: gamepb.Point
+	(*ChessStep)(nil),      // 2: gamepb.ChessStep
+	(*GobangInfo)(nil),     // 3: gamepb.GobangInfo
+	(*C2SPing)(nil),        // 4: gamepb.C2SPing
+	(*S2CPing)(nil),        // 5: gamepb.S2CPing
+	(*C2SLogin)(nil),       // 6: gamepb.C2SLogin
+	(*S2CLogin)(nil),       // 7: gamepb.S2CLogin
+	(*C2SMatch)(nil),       // 8: gamepb.C2SMatch
+	(*S2CMatch)(nil),       // 9: gamepb.S2CMatch
+	(*C2SStep)(nil),        // 10: gamepb.C2SStep
+	(*S2CStep)(nil),        // 11: gamepb.S2CStep
+	(*S2CGameResult)(nil),  // 12: gamepb.S2CGameResult
+	(*S2CPushMessage)(nil), // 13: gamepb.S2CPushMessage
+	(ErrorType)(0),         // 14: gamepb.ErrorType
+	(MatchType)(0),         // 15: gamepb.MatchType
+	(ColorType)(0),         // 16: gamepb.ColorType
+	(MatchResult)(0),       // 17: gamepb.MatchResult
+	(GameResult)(0),        // 18: gamepb.GameResult
 }
 var file_game_proto_depIdxs = []int32{
-	13, // 0: gamepb.Error.errorCode:type_name -> gamepb.ErrorType
+	14, // 0: gamepb.Error.errorCode:type_name -> gamepb.ErrorType
 	1,  // 1: gamepb.ChessStep.point:type_name -> gamepb.Point
 	2,  // 2: gamepb.GobangInfo.chessSteps:type_name -> gamepb.ChessStep
 	0,  // 3: gamepb.S2CPing.error:type_name -> gamepb.Error
-	14, // 4: gamepb.C2SMatch.match_type:type_name -> gamepb.MatchType
-	15, // 5: gamepb.S2CMatch.color:type_name -> gamepb.ColorType
-	16, // 6: gamepb.S2CMatch.result:type_name -> gamepb.MatchResult
+	15, // 4: gamepb.C2SMatch.match_type:type_name -> gamepb.MatchType
+	16, // 5: gamepb.S2CMatch.color:type_name -> gamepb.ColorType
+	17, // 6: gamepb.S2CMatch.result:type_name -> gamepb.MatchResult
 	1,  // 7: gamepb.C2SStep.point:type_name -> gamepb.Point
 	0,  // 8: gamepb.S2CStep.error:type_name -> gamepb.Error
 	3,  // 9: gamepb.S2CStep.gobangInfo:type_name -> gamepb.GobangInfo
-	17, // 10: gamepb.S2CGameResult.result:type_name -> gamepb.GameResult
+	18, // 10: gamepb.S2CGameResult.result:type_name -> gamepb.GameResult
 	11, // [11:11] is the sub-list for method output_type
 	11, // [11:11] is the sub-list for method input_type
 	11, // [11:11] is the sub-list for extension type_name
@@ -1007,6 +1058,18 @@ func file_game_proto_init() {
 				return nil
 			}
 		}
+		file_game_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CPushMessage); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1014,7 +1077,7 @@ func file_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_game_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
