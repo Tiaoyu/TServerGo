@@ -1,9 +1,8 @@
 package main
 
 import (
-	logger "TServerGo/log"
-	gamepb "TServerGo/pb"
-	"log"
+	"TServerGo/log"
+	"TServerGo/pb"
 	"sync"
 	"time"
 )
@@ -20,6 +19,7 @@ type MatchItem struct {
 }
 
 func initMatch() {
+	NotifyRegister(NotifyTypeRoleLogout, onMatchPlayerLogout)
 	// 匹配线程
 	go func() {
 		pair := make([]*MatchItem, 0)
@@ -27,7 +27,7 @@ func initMatch() {
 			select {
 			case item := <-matchPool:
 				pair = append(pair, item)
-				logger.Debugf("Join match queue success! OpenId:%v", item.OpenId)
+				log.Debugf("Join match queue success! OpenId:%v", item.OpenId)
 			case item := <-cancelPool:
 				for i, p := range pair {
 					if p.OpenId == item.OpenId {
@@ -38,9 +38,9 @@ func initMatch() {
 				matchMap.Delete(item.OpenId)
 				// 返回取消匹配成功
 				if player := GetPlayerByOpenId(item.OpenId); player != nil {
-					tmp := SendMsg(&gamepb.S2CMatch{
-						Result: gamepb.MatchResult_MatResultCancel,
-					}, gamepb.ProtocolType_ES2CMatch)
+					tmp := SendMsg(&pb.S2CMatch{
+						Result: pb.MatchResult_MatResultCancel,
+					}, pb.ProtocolType_ES2CMatch)
 					player.Sess.SendChannel <- tmp
 				}
 			}
@@ -51,7 +51,7 @@ func initMatch() {
 					RedId:         pair[0].OpenId,
 					BlackId:       pair[1].OpenId,
 					CreateTime:    time.Now().Unix(),
-					ChessStepList: make([]*gamepb.ChessStep, 0),
+					ChessStepList: make([]*pb.ChessStep, 0),
 					GobangInfo:    [15][15]int32{},
 					TurnId:        pair[0].OpenId,
 					GoBangTemp:    [15][15]*Piece{},
@@ -60,39 +60,36 @@ func initMatch() {
 				matchMap.Delete(pair[1].OpenId)
 				RoomLogic(room)
 				pair = make([]*MatchItem, 0)
-				logger.Debugf("Match success! %v vs %v", room.RedId, room.BlackId)
+				log.Debugf("Match success! %v vs %v", room.RedId, room.BlackId)
 			}
 		}
 	}()
 
-	NotifyRegister(NotifyTypeRoleLogout, onMatchPlayerLogout)
 }
 
 // JoinMatch 加入匹配
 func JoinMatch(player *Player) {
 	if _, ok := matchMap.Load(player.OpenId); ok {
-		log.Printf("%v already in mathing, so join match failed!", player.OpenId)
+		log.Warnf("%v already in mathing, so join match failed!", player.OpenId)
 		return
 	}
 
 	item := &MatchItem{
-		OpenId:     player.OpenId,
-		RemoteAddr: player.RemoteAddr,
+		OpenId: player.OpenId,
 	}
 
 	matchPool <- item
-	log.Println(player.OpenId, " join to match.")
+	log.Debugf(player.OpenId, " join to match.")
 }
 
 // CancelMatch 取消匹配
 func CancelMatch(player *Player) {
 	item := &MatchItem{
-		OpenId:     player.OpenId,
-		RemoteAddr: player.RemoteAddr,
+		OpenId: player.OpenId,
 	}
 
 	cancelPool <- item
-	log.Println(player.OpenId, " cancel match.")
+	log.Debugf(player.OpenId, " cancel match.")
 }
 
 func CancelMatchById(openId, remoteAddr string) {
@@ -101,7 +98,7 @@ func CancelMatchById(openId, remoteAddr string) {
 		RemoteAddr: remoteAddr,
 	}
 	cancelPool <- item
-	log.Println(openId, " cancel match.")
+	log.Debugf(openId, " cancel match.")
 }
 
 func onMatchPlayerLogout(params ...interface{}) {

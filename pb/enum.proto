@@ -1,54 +1,52 @@
 syntax = "proto3";
 
-option go_package = "tiaoyuyu.com/pb/gamepb";
+option go_package = "tiaoyuyu.com/pb";
 option java_multiple_files = true;
-option java_package = "gamepb";
-option java_outer_classname = "gamepb";
-
-package gamepb;
-
+option java_package = "pb";
+option java_outer_classname = "pb";
+package pb;
 
 // 协议类型
 enum ProtocolType {
-    EC2SPing = 0;
-    ES2CPing = 1;
-    EC2SLogin = 2;
-    ES2CLogin = 3;
-    EC2SMatch = 4;
-    ES2CMatch = 5;
-    EC2SStep = 6;
-    ES2CStep = 7;
-    ES2CGameResult = 8;
-    ES2CPushMsg = 9;
+  EC2SPing = 0;
+  ES2CPing = 1;
+  EC2SLogin = 2;
+  ES2CLogin = 3;
+  EC2SMatch = 4;
+  ES2CMatch = 5;
+  EC2SStep = 6;
+  ES2CStep = 7;
+  ES2CGameResult = 8;
+  ES2CPushMsg = 9;
 }
 
 // 匹配类型
 enum MatchType {
-    MatchTypeDefault = 0;
-    MatchTypeMatch = 1;
-    MatchTypeCancel = 2;
+  MatchTypeDefault = 0;
+  MatchTypeMatch = 1;
+  MatchTypeCancel = 2;
 }
 
 // 匹配结果
 enum MatchResult {
-    MatResultDefault = 0;
-    MatResultSuccess = 1;
-    MatResultFailed = 2;
-    MatResultMatching = 3;
-    MatResultCancel = 4;
+  MatResultDefault = 0;
+  MatResultSuccess = 1;
+  MatResultFailed = 2;
+  MatResultMatching = 3;
+  MatResultCancel = 4;
 }
 
 // 对局双方类型
 enum ColorType {
-    ColorTypeDefault = 0;
-    ColorTypeRed = 1; // 红方
-    ColorTypeBlack = 2; // 黑方
+  ColorTypeDefault = 0;
+  ColorTypeRed = 1;   // 红方
+  ColorTypeBlack = 2; // 黑方
 }
 
 // 对局结果
 enum GameResult {
-    GameResultDefault=  0;
-    GameResultWin = 1; // 赢
-    GameResultFail =2; // 输
-    GameResultDraw = 3; // 和
+  GameResultDefault = 0;
+  GameResultWin = 1;  // 赢
+  GameResultFail = 2; // 输
+  GameResultDraw = 3; // 和
 }

@@ -1,10 +1,9 @@
 package main
 
 import (
-	"log"
-	"time"
-
+	"TServerGo/log"
 	_ "github.com/go-sql-driver/mysql"
+	"time"
 	"xorm.io/xorm"
 )
 
@@ -28,11 +27,11 @@ func (db *DBProxy) Init(driverName, dataSourceName string) {
 
 	engine, err := xorm.NewEngine(db.DriverName, db.DataSourceName)
 	if err != nil {
-		log.Fatalf("dbproxy create failed! Error:%v", err)
+		log.Debugf("db proxy create failed! Error:%v", err)
 	}
 	engine.SetTZLocation(time.UTC)
 	db.Engine = engine
-	log.Printf("dbproxy driver:%v, host:%v", db.DriverName, db.DataSourceName)
+	log.Debugf("db proxy driver:%v, host:%v", db.DriverName, db.DataSourceName)
 }
 
 func (db *DBProxy) Sync() {

@@ -1,11 +1,10 @@
 syntax = "proto3";
 
-option go_package = "tiaoyuyu.com/pb/gamepb";
+option go_package = "tiaoyuyu.com/pb";
 option java_multiple_files = true;
-option java_package = "gamepb";
-option java_outer_classname = "gamepb";
-
-package gamepb;
+option java_package = "pb";
+option java_outer_classname = "pb";
+package pb;
 
 import "enum.proto";
 import "error.proto";
@@ -13,75 +12,65 @@ import "error.proto";
 //============DATA===============//
 
 message Error {
-    ErrorType errorCode = 1;
-    string errorMsg = 2;
+  ErrorType errorCode = 1;
+  string errorMsg = 2;
 }
 
 // 位置 及 阵营
 message Point {
-    int32 x = 1;
-    int32 y = 2;
-    int32 Camp = 3;
+  int32 x = 1;
+  int32 y = 2;
+  int32 Camp = 3;
 }
 
 // 位置 阵营 及 次序
 message ChessStep {
-    Point point = 1; // 位置 及 阵营
-    int32 index = 2; // 当前局的第几步
+  Point point = 1; // 位置 及 阵营
+  int32 index = 2; // 当前局的第几步
 }
 
 // 当前对局
-message GobangInfo {
-    repeated ChessStep chessSteps = 1;
-}
+message GobangInfo { repeated ChessStep chessSteps = 1; }
 //===============================//
 
 //============PROTOCOL===========//
 // ping
-message C2SPing {
-    int64 timestamp = 1;
-}
+message C2SPing { int64 timestamp = 1; }
 message S2CPing {
-    Error error = 1;
-    int64 timestamp = 2;
+  Error error = 1;
+  int64 timestamp = 2;
 }
 
 // 登陆
 message C2SLogin {
-    string    NickName = 1; // 昵称
-    string AvatarUrl = 2; // 头像
+  string NickName = 1;  // 昵称
+  string AvatarUrl = 2; // 头像
 }
-message S2CLogin {
-    string ErrorCode = 1;
-}
+message S2CLogin { Error error = 1; }
 
 // 匹配
-message C2SMatch {
-    MatchType  match_type = 1;
-}
+message C2SMatch { MatchType match_type = 1; }
 message S2CMatch {
-    string enemyName = 1; // 敌方昵称
-    string enemyAvatarUrl = 2; // 敌方头像
-    ColorType color = 3; // 阵营（红方、黑方）
-    MatchResult result = 4;
+  Error error = 1;
+  string enemyName = 2;      // 敌方昵称
+  string enemyAvatarUrl = 3; // 敌方头像
+  ColorType color = 4;       // 阵营（红方、黑方）
+  MatchResult result = 5;
 }
 
 // 走一步
-message C2SStep {
-    Point point = 1;
-}
+message C2SStep { Point point = 1; }
 message S2CStep {
-    Error error = 1;
-    GobangInfo gobangInfo = 2;
+  Error error = 1;
+  GobangInfo gobangInfo = 2;
 }
 
 // 对局结果
-message S2CGameResult {
-    GameResult result = 1;
-}
+message S2CGameResult { GameResult result = 1; }
 
 // 推送消息
-message S2CPushMessage{
-    string msg = 1;
+message S2CPushMessage {
+  Error error = 1;
+  string msg = 2;
 }
 //==========================//

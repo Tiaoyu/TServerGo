@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-option go_package = "tiaoyuyu.com/pb/gamepb";
+option go_package = "tiaoyuyu.com/pb";
 option java_multiple_files = true;
-option java_package = "gamepb";
-option java_outer_classname = "gamepb";
-package gamepb;
+option java_package = "pb";
+option java_outer_classname = "pb";
+package pb;
 
 enum ErrorType {
-    SUCCESS = 0;
-    FAILED = 1;
-    UNKNOW = 2;
+  SUCCESS = 0;
+  FAILED = 1;
+  UNKNOW = 2;
 }

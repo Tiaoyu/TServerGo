@@ -1,4 +1,4 @@
-package gamepb
+package pb
 
 import (
 	"net"

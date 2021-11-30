@@ -1,7 +1,7 @@
 package main
 
 import (
-	logger "TServerGo/log"
+	"TServerGo/log"
 	"encoding/binary"
 	"errors"
 	"flag"
@@ -16,7 +16,7 @@ var (
 )
 
 func main() {
-	logger.Init("TServer", logger.LogLevelDEBUG|logger.LogLevelINFO|logger.LogLevelWARN|logger.LogLevelERROR)
+	log.Init("tserver", log.LogLevelDEBUG|log.LogLevelINFO|log.LogLevelWARN|log.LogLevelERROR)
 	flag.Parse()
 
 	// 数据库初始化
@@ -25,19 +25,20 @@ func main() {
 	db.Sync()
 
 	// tcp服务初始化
-	logger.Info("init tcp...")
+	log.Info("init tcp...")
 	addr, err := net.ResolveTCPAddr("tcp", ":8081")
 	if err != nil {
-		logger.Errorf("resolve tcp addr error, err:%v", err)
+		log.Errorf("resolve tcp addr error, err:%v", err)
 		return
 	}
 
 	ln, err := net.ListenTCP("tcp", addr)
 	if err != nil {
-		logger.Errorf("net error, err: %v", err)
+		log.Errorf("net error, err: %v", err)
 		return
 	}
-	// init notify
+
+	// 各个系统初始化
 	initNotify()
 	initMatch()
 	initRoom()
@@ -47,7 +48,7 @@ func main() {
 	for {
 		conn, err := ln.AcceptTCP()
 		if err != nil {
-			logger.Errorf("net accept error, err: %v", err)
+			log.Errorf("net accept error, err: %v", err)
 		}
 		conn.SetReadBuffer(SocketReadBufferSize)
 		conn.SetWriteBuffer(SocketSendBufferSize)
@@ -58,7 +59,7 @@ func main() {
 
 func handlerConnect(conn net.Conn) {
 	defer conn.Close()
-	logger.Debugf("Connected, Addr:%v", conn.RemoteAddr())
+	log.Debugf("Connected, Addr:%v", conn.RemoteAddr())
 	connectInfo, ok := connMap[conn.RemoteAddr().String()]
 	if !ok {
 		connectInfo = &ConnectInfo{
@@ -70,19 +71,19 @@ func handlerConnect(conn net.Conn) {
 	for {
 		_, err := io.ReadFull(conn, pLen)
 		if err != nil {
-			logger.Errorf("net error on ReadFull pbLen, err:%v", err)
+			log.Errorf("net error on ReadFull pbLen, err:%v", err)
 			handler.Error()
 			break
 		}
 		len := binary.BigEndian.Uint32(pLen)
 		if len < 4 {
-			logger.Errorf("net error on PBLen, err:%v", errors.New("protocol len is invalid"))
+			log.Errorf("net error on PBLen, err:%v", errors.New("protocol len is invalid"))
 			break
 		}
 		msg := make([]byte, len)
 		_, err = io.ReadFull(conn, msg)
 		if err != nil {
-			logger.Errorf("net error on ReadFull msg, err:%v", err)
+			log.Errorf("net error on ReadFull msg, err:%v", err)
 			break
 		}
 		handler.ParsePB(connectInfo, msg)

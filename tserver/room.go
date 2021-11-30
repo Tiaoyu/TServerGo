@@ -6,8 +6,8 @@
 package main
 
 import (
-	logger "TServerGo/log"
-	gamepb "TServerGo/pb"
+	"TServerGo/log"
+	"TServerGo/pb"
 	"encoding/json"
 	"sync"
 	"time"
@@ -19,10 +19,10 @@ type Room struct {
 	RedId           string
 	BlackId         string
 	CreateTime      int64
-	ChessStepList   []*gamepb.ChessStep
+	ChessStepList   []*pb.ChessStep
 	GobangInfo      [15][15]int32
 	TurnId          string // 当前手
-	MsgChannel      chan *gamepb.ChessStep
+	MsgChannel      chan *pb.ChessStep
 	LoginoutChannel chan string
 
 	GoBangTemp [15][15]*Piece // 对局辅助信息 用来标志每个位置的四个方向的连珠数
@@ -61,25 +61,21 @@ func RoomLogic(room *Room) error {
 	PlayerMapLock.RUnlock()
 
 	//分别给红方、黑方发送对手 消息
-	res := SendMsg(&gamepb.S2CMatch{
-		EnemyName:      blackPlayer.NickName,
-		EnemyAvatarUrl: blackPlayer.AvatarUrl,
-		Color:          gamepb.ColorType_ColorTypeBlack,
-		Result:         gamepb.MatchResult_MatResultSuccess,
-	}, gamepb.ProtocolType_ES2CMatch)
+	res := SendMsg(&pb.S2CMatch{
+		Color:  pb.ColorType_ColorTypeBlack,
+		Result: pb.MatchResult_MatResultSuccess,
+	}, pb.ProtocolType_ES2CMatch)
 	redPlayer.Sess.SendChannel <- res
-	res = SendMsg(&gamepb.S2CMatch{
-		EnemyName:      redPlayer.NickName,
-		EnemyAvatarUrl: redPlayer.AvatarUrl,
-		Color:          gamepb.ColorType_ColorTypeRed,
-		Result:         gamepb.MatchResult_MatResultSuccess,
-	}, gamepb.ProtocolType_ES2CMatch)
+	res = SendMsg(&pb.S2CMatch{
+		Color:  pb.ColorType_ColorTypeRed,
+		Result: pb.MatchResult_MatResultSuccess,
+	}, pb.ProtocolType_ES2CMatch)
 	blackPlayer.Sess.SendChannel <- res
 
 	// 加入房间管理
 	RoomOpenIdMap.Store(room.RedId, room)
 	RoomOpenIdMap.Store(room.BlackId, room)
-	room.MsgChannel = make(chan *gamepb.ChessStep)
+	room.MsgChannel = make(chan *pb.ChessStep)
 	room.LoginoutChannel = make(chan string)
 	room.CreateTime = time.Now().Unix()
 	go func() {
@@ -92,7 +88,7 @@ func RoomLogic(room *Room) error {
 			case <-t.C:
 				t.Reset(time.Second * 2)
 				if time.Now().Unix()-room.CreateTime > 3600 {
-					logger.Debugf("Room is time out, so it will be destroyed! Names:%v-%v", redPlayer.NickName, blackPlayer.NickName)
+					log.Debugf("Room is time out, so it will be destroyed! Names:%v-%v", redPlayer.OpenId, blackPlayer.OpenId)
 					finished = true
 				}
 			case openIdTmp, ok := <-room.LoginoutChannel:
@@ -106,13 +102,13 @@ func RoomLogic(room *Room) error {
 					}
 					r := room.(*Room)
 					if r.BlackId == openIdTmp {
-						redPlayer.Sess.SendChannel <- SendMsg(&gamepb.S2CPushMessage{
+						redPlayer.Sess.SendChannel <- SendMsg(&pb.S2CPushMessage{
 							Msg: "YOU WIN!",
-						}, gamepb.ProtocolType_ES2CPushMsg)
+						}, pb.ProtocolType_ES2CPushMsg)
 					} else if r.RedId == openIdTmp {
-						blackPlayer.Sess.SendChannel <- SendMsg(&gamepb.S2CPushMessage{
+						blackPlayer.Sess.SendChannel <- SendMsg(&pb.S2CPushMessage{
 							Msg: "YOU WIN!",
-						}, gamepb.ProtocolType_ES2CPushMsg)
+						}, pb.ProtocolType_ES2CPushMsg)
 					}
 
 					finished = true
@@ -123,10 +119,10 @@ func RoomLogic(room *Room) error {
 						break
 					}
 					if !isPosValid(room, step.Point) {
-						logger.Debugf("%v step to an wrong pos (%v)", step.Point.Camp, step.Point)
+						log.Debugf("%v step to an wrong pos (%v)", step.Point.Camp, step.Point)
 						continue
 					}
-					logger.Debugf("%v step to %v", step.Point.Camp, step.Point)
+					log.Debugf("%v step to %v", step.Point.Camp, step.Point)
 					room.GobangInfo[step.Point.X][step.Point.Y] = step.Point.Camp
 					room.ChessStepList = append(room.ChessStepList, step)
 					// 当前位置没人下过则创建一步棋
@@ -137,10 +133,10 @@ func RoomLogic(room *Room) error {
 							lOblique:   0,
 							rOblique:   0,
 						}
-						if step.Point.Camp == int32(gamepb.ColorType_ColorTypeRed) {
+						if step.Point.Camp == int32(pb.ColorType_ColorTypeRed) {
 							temp.openId = room.RedId
 							room.TurnId = room.BlackId
-						} else if step.Point.Camp == int32(gamepb.ColorType_ColorTypeBlack) {
+						} else if step.Point.Camp == int32(pb.ColorType_ColorTypeBlack) {
 							temp.openId = room.BlackId
 							room.TurnId = room.RedId
 						}
@@ -149,12 +145,12 @@ func RoomLogic(room *Room) error {
 
 					// 更新棋盘数据
 					updateGobangTemp(room, step.Point.X, step.Point.Y)
-					res := SendMsg(&gamepb.S2CStep{
+					res := SendMsg(&pb.S2CStep{
 						Error: nil,
-						GobangInfo: &gamepb.GobangInfo{
+						GobangInfo: &pb.GobangInfo{
 							ChessSteps: room.ChessStepList,
 						},
-					}, gamepb.ProtocolType_ES2CStep)
+					}, pb.ProtocolType_ES2CStep)
 					if user := GetPlayerByOpenId(room.RedId); user != nil {
 						user.Sess.SendChannel <- res
 						redPlayer = user
@@ -167,12 +163,12 @@ func RoomLogic(room *Room) error {
 					// 判断胜负
 					winId, isWin := WhoWin(room)
 					if isWin {
-						wRes := SendMsg(&gamepb.S2CGameResult{
-							Result: gamepb.GameResult_GameResultWin,
-						}, gamepb.ProtocolType_ES2CGameResult)
-						lRes := SendMsg(&gamepb.S2CGameResult{
-							Result: gamepb.GameResult_GameResultFail,
-						}, gamepb.ProtocolType_ES2CGameResult)
+						wRes := SendMsg(&pb.S2CGameResult{
+							Result: pb.GameResult_GameResultWin,
+						}, pb.ProtocolType_ES2CGameResult)
+						lRes := SendMsg(&pb.S2CGameResult{
+							Result: pb.GameResult_GameResultFail,
+						}, pb.ProtocolType_ES2CGameResult)
 
 						if winId == redPlayer.OpenId {
 							redPlayer.Sess.SendChannel <- wRes
@@ -222,10 +218,10 @@ func RoomLogic(room *Room) error {
 		defer func() {
 			RoomOpenIdMap.Delete(room.RedId)
 			RoomOpenIdMap.Delete(room.BlackId)
-			logger.Debugf("room destroyed! Red:%v Black:%v", redPlayer.NickName, blackPlayer.NickName)
+			log.Debugf("room destroyed! Red:%v Black:%v", redPlayer.OpenId, blackPlayer.OpenId)
 		}()
 	}()
-	logger.Debugf("create room success, RedId:%v, BlackId:%v", room.RedId, room.BlackId)
+	log.Debugf("create room success, RedId:%v, BlackId:%v", room.RedId, room.BlackId)
 	return nil
 }
 
@@ -245,7 +241,7 @@ func WhoWin(room *Room) (string, bool) {
 }
 
 // 位置是否合法
-func isPosValid(room *Room, pos *gamepb.Point) bool {
+func isPosValid(room *Room, pos *pb.Point) bool {
 	res := true
 	if pos.X < 0 || pos.X >= 15 {
 		res = false
@@ -384,9 +380,9 @@ func onRoomPlayerLogin(params ...interface{}) {
 	param := params[0].(*NotifyRoleLoginParam)
 	if room, ok := RoomOpenIdMap.Load(param.OpenId); ok {
 		if user := GetPlayerByOpenId(param.OpenId); user != nil {
-			res := SendMsg(&gamepb.S2CStep{
-				GobangInfo: &gamepb.GobangInfo{ChessSteps: room.(*Room).ChessStepList},
-			}, gamepb.ProtocolType_ES2CStep)
+			res := SendMsg(&pb.S2CStep{
+				GobangInfo: &pb.GobangInfo{ChessSteps: room.(*Room).ChessStepList},
+			}, pb.ProtocolType_ES2CStep)
 			user.Sess.SendChannel <- res
 		}
 	}

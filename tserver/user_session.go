@@ -5,8 +5,7 @@ import "net"
 type UserSession struct {
 	Conn        net.Conn
 	OpenId      string
-	RemoteAttr  string
-	SendChannel chan []byte
+	SendChannel chan []byte //消息发送chan
 }
 
 func (s *UserSession) Send(msg []byte) {

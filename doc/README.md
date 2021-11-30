@@ -36,17 +36,14 @@ return err
 return session.Commit()
 ```
 
-## grpc
-
-[https://grpc.io/docs/protoc-installation/](https://grpc.io/docs/protoc-installation/)
-
 ## 功能
+
+### 登陆
 
 ### 匹配
 
-角色匹配后加入匹配池子
-匹配线程每秒从池子中取若干角色
-有足够角色后进行创建房间
-创建完房间后开始进入房间线程
+角色匹配后加入匹配池子 匹配线程每秒从池子中取若干角色 有足够角色后进行创建房间 创建完房间后开始进入房间线程
 
-### 
+### 走棋
+
+### 结算
