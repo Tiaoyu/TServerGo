@@ -7,6 +7,8 @@ import (
 	"flag"
 	"io"
 	"net"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 var (
@@ -18,6 +20,10 @@ var (
 func main() {
 	log.Init("tserver", log.LogLevelDEBUG|log.LogLevelINFO|log.LogLevelWARN|log.LogLevelERROR)
 	flag.Parse()
+
+	go func() {
+		log.Debugf("", http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	// 数据库初始化
 	db := dbProxy

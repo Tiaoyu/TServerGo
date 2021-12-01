@@ -80,7 +80,8 @@ func SendLoop(sess *UserSession) {
 	for {
 		msg, ok := <-sess.SendChannel
 		if !ok {
-			continue
+			log.Debugf("Send channel is closed! OpenId:%v", sess.OpenId)
+			break
 		}
 		sess.Send(msg)
 	}

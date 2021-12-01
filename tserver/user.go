@@ -7,10 +7,20 @@ import (
 	"xorm.io/xorm"
 )
 
+type PlayerState uint8
+
+const (
+	PlayerStateOnline   PlayerState = 1
+	PlayerStateMatching PlayerState = 2
+	PlayerStateInRoom   PlayerState = 3
+	PlayerStateLogout   PlayerState = 4
+)
+
 // Player 玩家数据
 type Player struct {
 	OpenId string
 	Sess   *UserSession
+	State  PlayerState
 }
 
 var (
@@ -27,10 +37,12 @@ func PlayerLogin(u *Player) error {
 	PlayerMapLock.Lock()
 	defer PlayerMapLock.Unlock()
 	if oldUser, ok := PlayerOpenIdMap[u.OpenId]; ok {
+		u.State = oldUser.State
 		// 已有登陆角色直接顶号替换
 		PlayerOpenIdMap[oldUser.OpenId] = u
 		oldUser.Sess.Close()
 	} else {
+		u.State = PlayerStateOnline
 		PlayerOpenIdMap[u.OpenId] = u
 	}
 

@@ -212,6 +212,8 @@ func RoomLogic(room *Room) error {
 				}
 			}
 			if finished {
+				redPlayer.State = PlayerStateOnline
+				blackPlayer.State = PlayerStateOnline
 				break
 			}
 		}
