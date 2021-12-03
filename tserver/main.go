@@ -10,7 +10,9 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 )
-
+const (
+	maxPackageSize = 1024
+)
 var (
 	Mysql     = flag.String("MYSQL", "", "please set mysql")
 	MysqlHost = flag.String("MYSQL_HOST", "", "please set mysql host")
@@ -82,7 +84,7 @@ func handlerConnect(conn net.Conn) {
 			break
 		}
 		len := binary.BigEndian.Uint32(pLen)
-		if len < 4 {
+		if len < 4 || len > maxPackageSize {
 			log.Errorf("net error on PBLen, err:%v", errors.New("protocol len is invalid"))
 			break
 		}
