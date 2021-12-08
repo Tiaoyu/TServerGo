@@ -37,8 +37,8 @@ func main() {
 		log.Errorf("resolve tcp addr error, err:%v", err)
 		return
 	}
-
 	ln, err := net.ListenTCP("tcp", addr)
+
 	if err != nil {
 		log.Errorf("net error, err: %v", err)
 		return
@@ -53,6 +53,7 @@ func main() {
 	// socket accept
 	for {
 		conn, err := ln.AcceptTCP()
+		conn.SetNoDelay(true)
 		if err != nil {
 			log.Errorf("net accept error, err: %v", err)
 		}
