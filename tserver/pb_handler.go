@@ -83,12 +83,14 @@ func SendLoop(sess *UserSession) {
 			log.Debugf("Send channel is closed! OpenId:%v", sess.OpenId)
 			break
 		}
+		pid := binary.BigEndian.Uint32(msg[4:8])
+		log.Debugf("Send OpenId:%v pid:%v", sess.OpenId, pid)
 		sess.Send(msg)
 	}
 }
 
 func OnLogin(sess *UserSession, msg []byte) ([]byte, uint32, error) {
-	log.Debugf("Recv msg bytes:%v", msg)
+	log.Debugf("Login Recv msg bytes:%v OpenId:%v", msg, sess.OpenId)
 	req := &pb.C2SLogin{}
 	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Errorf("Failed to parse C2SPing:%v", err)
@@ -138,7 +140,7 @@ func OnMatch(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Errorf("Failed to parse C2SMatch:%v", err)
 	}
-	log.Debugf("Recv msg:%v", req)
+	log.Debugf("OnMatch Recv msg:%v", req)
 	player, ok := PlayerOpenIdMap[sess.OpenId]
 	if !ok {
 		return nil, 0, nil
