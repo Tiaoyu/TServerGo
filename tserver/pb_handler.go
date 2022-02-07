@@ -5,6 +5,7 @@ import (
 	"TServerGo/pb"
 	"encoding/binary"
 	"google.golang.org/protobuf/proto"
+	"strings"
 )
 
 var (
@@ -99,7 +100,7 @@ func OnLogin(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	log.Debugf("Recv msg:%v", req)
 
 	player := &Player{
-		OpenId: req.NickName,
+		OpenId: strings.TrimSpace(req.NickName),
 		Sess:   sess,
 	}
 	err := PlayerLogin(player)
