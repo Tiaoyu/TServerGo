@@ -79,14 +79,14 @@ func RoomLogic(room *Room) error {
 	room.LoginoutChannel = make(chan string)
 	room.CreateTime = time.Now().Unix()
 	go func() {
-		d := time.Duration(time.Second * 2)
+		d := time.Second * 2
 		t := time.NewTimer(d)
 		defer t.Stop()
 		var finished = false
 		for {
 			select {
 			case <-t.C:
-				t.Reset(time.Second * 2)
+				t.Reset(d)
 				if time.Now().Unix()-room.CreateTime > 3600 {
 					log.Debugf("Room is time out, so it will be destroyed! Names:%v-%v", redPlayer.OpenId, blackPlayer.OpenId)
 					finished = true
