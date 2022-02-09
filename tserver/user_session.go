@@ -1,6 +1,9 @@
 package main
 
-import "net"
+import (
+	"TServerGo/log"
+	"net"
+)
 
 type UserSession struct {
 	Conn        net.Conn
@@ -9,8 +12,13 @@ type UserSession struct {
 }
 
 func (s *UserSession) Send(msg []byte) {
-	s.Conn.Write(msg)
+	if _, err := s.Conn.Write(msg); err != nil {
+		log.Errorf("write to socket failed!")
+	}
 }
 func (s *UserSession) Close() {
-	s.Conn.Close()
+	err := s.Conn.Close()
+	if err != nil {
+		log.Errorf("Conn close failed! Error:%v", err)
+	}
 }

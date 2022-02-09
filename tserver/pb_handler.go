@@ -34,13 +34,13 @@ func (h *HandlerProtobuf) Error() {
 }
 
 // ParsePB 反序列化协议
-func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, error) {
+func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) {
 	// 反序列化协议
 	{
 		protoId := binary.BigEndian.Uint32(msg[:4])
 		call, ok := pbMap[pb.ProtocolType(protoId)]
 		if !ok {
-			return nil, nil
+			return
 		}
 
 		// 登陆
@@ -48,7 +48,7 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 		if protoId == uint32(pb.ProtocolType_EC2SLogin) {
 			if h.sess != nil {
 				log.Errorf("repeat login error")
-				return nil, nil
+				return
 			}
 			sess = &UserSession{
 				Conn:        connectInfo.SOCKET,
@@ -59,12 +59,12 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 		}
 
 		if h.sess == nil {
-			return nil, nil
+			return
 		}
 
 		ack, ackPId, _ := call(h.sess, msg[4:])
 		if ack == nil {
-			return nil, nil
+			return
 		}
 		var bufHead = make([]byte, 4)
 		var bufPId = make([]byte, 4)
@@ -74,7 +74,6 @@ func (h *HandlerProtobuf) ParsePB(connectInfo *ConnectInfo, msg []byte) (error, 
 		bufHead = append(bufHead, ack...)
 		h.sess.SendChannel <- bufHead
 	}
-	return nil, nil
 }
 
 func SendLoop(sess *UserSession) {
@@ -91,13 +90,12 @@ func SendLoop(sess *UserSession) {
 }
 
 func OnLogin(sess *UserSession, msg []byte) ([]byte, uint32, error) {
-	log.Debugf("Login Recv msg bytes:%v OpenId:%v", msg, sess.OpenId)
 	req := &pb.C2SLogin{}
 	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Errorf("Failed to parse C2SPing:%v", err)
 		return nil, 0, err
 	}
-	log.Debugf("Recv msg:%v", req)
+	log.Debugf("OnLogin Receive msg:%v, OpenId:%v", req, sess.OpenId)
 
 	player := &Player{
 		OpenId: strings.TrimSpace(req.NickName),
@@ -123,16 +121,13 @@ func OnLogin(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 }
 
 func OnPing(sess *UserSession, msg []byte) ([]byte, uint32, error) {
-	log.Debugf("Recv msg bytes:%v", msg)
 	req := &pb.C2SPing{}
 	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Errorf("Failed to parse C2SPing:%v", err)
 		return nil, 0, err
 	}
-	log.Debugf("Recv msg:%v", req)
-
+	log.Debugf("OnPing Receive msg:%v, OpenId:%v", req, sess.OpenId)
 	ack, _ := proto.Marshal(&pb.S2CPing{Timestamp: req.Timestamp})
-
 	return ack, uint32(pb.ProtocolType_ES2CPing), nil
 }
 
@@ -141,7 +136,7 @@ func OnMatch(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Errorf("Failed to parse C2SMatch:%v", err)
 	}
-	log.Debugf("OnMatch Recv msg:%v", req)
+	log.Debugf("OnMatch Receive msg:%v, OpenId:%v", req, sess)
 	player, ok := PlayerOpenIdMap[sess.OpenId]
 	if !ok {
 		return nil, 0, nil
@@ -164,7 +159,7 @@ func OnStep(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Errorf("Failed to parse C2SStep:%v", err)
 	}
-	log.Debugf("Recv msg:%v", req)
+	log.Debugf("OnStep Receive msg:%v OpenId:%v", req, sess.OpenId)
 
 	player, ok := PlayerOpenIdMap[sess.OpenId]
 	if !ok {

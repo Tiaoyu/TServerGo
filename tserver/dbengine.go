@@ -35,16 +35,25 @@ func (db *DBProxy) Init(driverName, dataSourceName string) {
 }
 
 func (db *DBProxy) Sync() {
-	db.Engine.Sync2(new(User))
-	db.Engine.Sync2(new(Race))
+	if err := db.Engine.Sync2(new(User)); err != nil {
+		log.Errorf("xorm sync User failed!!!")
+	}
+	if err := db.Engine.Sync2(new(Race)); err != nil {
+		log.Errorf("xorm sync Race failed!!!")
+	}
 }
 
-func (db *DBProxy) Transaction(fun func(session *xorm.Session) (interface{}, error)) (interface{}, error) {
-	return db.Engine.Transaction(func(session *xorm.Session) (interface{}, error) {
+func (db *DBProxy) Transaction(fun func(session *xorm.Session) (interface{}, error)) error {
+	result, err := db.Engine.Transaction(func(session *xorm.Session) (interface{}, error) {
 		result, err := fun(session)
 		if err != nil {
 			return nil, err
 		}
 		return result, nil
 	})
+
+	if err != nil {
+		log.Errorf("DB transaction failed! Result:%v err:%v", result, err)
+	}
+	return err
 }

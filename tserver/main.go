@@ -10,9 +10,11 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 )
+
 const (
 	maxPackageSize = 1024
 )
+
 var (
 	Mysql     = flag.String("MYSQL", "", "please set mysql")
 	MysqlHost = flag.String("MYSQL_HOST", "", "please set mysql host")
@@ -20,11 +22,11 @@ var (
 )
 
 func main() {
-	log.Init("tserver", log.LogLevelDEBUG|log.LogLevelINFO|log.LogLevelWARN|log.LogLevelERROR)
+	log.Init("TServer", log.LogLevelDEBUG|log.LogLevelINFO|log.LogLevelWARN|log.LogLevelERROR)
 	flag.Parse()
 
 	go func() {
-		log.Debugf("", http.ListenAndServe("localhost:6060", nil))
+		log.Debugf("http listen error: %v", http.ListenAndServe("localhost:6060", nil))
 	}()
 
 	// 数据库初始化
@@ -55,19 +57,33 @@ func main() {
 	// socket accept
 	for {
 		conn, err := ln.AcceptTCP()
-		conn.SetNoDelay(true)
 		if err != nil {
-			log.Errorf("net accept error, err: %v", err)
+			log.Errorf("net AcceptTCP error, err: %v", err)
+			continue
 		}
-		conn.SetReadBuffer(SocketReadBufferSize)
-		conn.SetWriteBuffer(SocketSendBufferSize)
-		conn.SetNoDelay(true)
+		if err = conn.SetReadBuffer(SocketReadBufferSize); err != nil {
+			log.Errorf("net SetReadBuffer error, err: %v", err)
+			continue
+		}
+		if err = conn.SetWriteBuffer(SocketSendBufferSize); err != nil {
+			log.Errorf("net SetWriteBuffer error, err: %v", err)
+			continue
+		}
+		if err = conn.SetNoDelay(true); err != nil {
+			log.Errorf("net SetNoDelay error, err: %v", err)
+			continue
+		}
 		go handlerConnect(conn)
 	}
 }
 
 func handlerConnect(conn net.Conn) {
-	defer conn.Close()
+	defer func() {
+		err := conn.Close()
+		if err != nil {
+			log.Errorf("Conn close failed. Error:%v", err)
+		}
+	}()
 	log.Debugf("Connected, Addr:%v", conn.RemoteAddr())
 	connectInfo, ok := connMap[conn.RemoteAddr().String()]
 	if !ok {
@@ -84,12 +100,12 @@ func handlerConnect(conn net.Conn) {
 			handler.Error()
 			break
 		}
-		len := binary.BigEndian.Uint32(pLen)
-		if len < 4 || len > maxPackageSize {
+		l := binary.BigEndian.Uint32(pLen)
+		if l < 4 || l > maxPackageSize {
 			log.Errorf("net error on PBLen, err:%v", errors.New("protocol len is invalid"))
 			break
 		}
-		msg := make([]byte, len)
+		msg := make([]byte, l)
 		_, err = io.ReadFull(conn, msg)
 		if err != nil {
 			log.Errorf("net error on ReadFull msg, err:%v", err)

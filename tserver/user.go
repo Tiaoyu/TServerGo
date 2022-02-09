@@ -12,8 +12,8 @@ type PlayerState uint8
 const (
 	PlayerStateOnline   PlayerState = 1
 	PlayerStateMatching PlayerState = 2
-	PlayerStateInRoom   PlayerState = 3
-	PlayerStateLogout   PlayerState = 4
+	//PlayerStateInRoom   PlayerState = 3
+	//PlayerStateLogout   PlayerState = 4
 )
 
 // Player 玩家数据
@@ -61,7 +61,7 @@ func PlayerLogin(u *Player) error {
 		return nil, err
 	}
 	// 登陆成功后 需要更新数据库
-	_, err := dbProxy.Transaction(fun)
+	err := dbProxy.Transaction(fun)
 	if err != nil {
 		log.Errorf("Login failed! OpenId:%v Error:%v", u.OpenId, err)
 		return err

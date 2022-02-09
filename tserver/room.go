@@ -9,6 +9,7 @@ import (
 	"TServerGo/log"
 	"TServerGo/pb"
 	"encoding/json"
+	"errors"
 	"sync"
 	"time"
 
@@ -45,18 +46,16 @@ func initRoom() {
 }
 
 // RoomLogic 房间逻辑
-func RoomLogic(room *Room) error {
+func RoomLogic(room *Room) {
 	PlayerMapLock.RLock()
 	//获取红方、黑方玩家
 	redPlayer, ok := PlayerOpenIdMap[room.RedId]
 	if !ok {
 		PlayerMapLock.RUnlock()
-		return nil
 	}
 	blackPlayer, ok := PlayerOpenIdMap[room.BlackId]
 	if !ok {
 		PlayerMapLock.RUnlock()
-		return nil
 	}
 	PlayerMapLock.RUnlock()
 
@@ -178,11 +177,15 @@ func RoomLogic(room *Room) error {
 							redPlayer.Sess.SendChannel <- lRes
 						}
 						// 存储胜负数据
-						dbProxy.Transaction(func(session *xorm.Session) (interface{}, error) {
+						err := dbProxy.Transaction(func(session *xorm.Session) (interface{}, error) {
 							rUser := &User{}
 							bUser := &User{}
-							session.Where("open_id = ?", redPlayer.OpenId).Get(rUser)
-							session.Where("open_id = ?", blackPlayer.OpenId).Get(bUser)
+							if _, err := session.Where("open_id = ?", redPlayer.OpenId).Get(rUser); err != nil {
+								return nil, errors.New("cannot get the user")
+							}
+							if _, err := session.Where("open_id = ?", blackPlayer.OpenId).Get(bUser); err != nil {
+								return nil, errors.New("cannot get the user")
+							}
 							if winId == redPlayer.OpenId {
 								rUser.WinCount++
 								rUser.Score++
@@ -194,8 +197,12 @@ func RoomLogic(room *Room) error {
 								rUser.Score--
 								rUser.FailedCount++
 							}
-							session.Where("open_id = ?", redPlayer.OpenId).Update(rUser)
-							session.Where("open_id = ?", blackPlayer.OpenId).Update(bUser)
+							if _, err := session.Where("open_id = ?", redPlayer.OpenId).Update(rUser); err != nil {
+								return nil, errors.New("cannot update the user")
+							}
+							if _, err := session.Where("open_id = ?", blackPlayer.OpenId).Update(bUser); err != nil {
+								return nil, errors.New("cannot update the user")
+							}
 							race := &Race{
 								RedOpenId:   redPlayer.OpenId,
 								BlackOpenId: blackPlayer.OpenId,
@@ -204,9 +211,12 @@ func RoomLogic(room *Room) error {
 
 							gobangInfo, _ := json.Marshal(room.ChessStepList)
 							race.GobangInfo = string(gobangInfo)
-							session.Insert(race)
-							return nil, nil
+							_, err := session.Insert(race)
+							return race, err
 						})
+						if err != nil {
+							log.Errorf("race data transaction failed! ")
+						}
 						finished = true
 					}
 				}
@@ -224,7 +234,6 @@ func RoomLogic(room *Room) error {
 		}()
 	}()
 	log.Debugf("create room success, RedId:%v, BlackId:%v", room.RedId, room.BlackId)
-	return nil
 }
 
 // WhoWin 谁赢了 是否有输赢
