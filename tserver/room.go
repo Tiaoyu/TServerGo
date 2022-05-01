@@ -24,7 +24,7 @@ type Room struct {
 	GobangInfo      [15][15]int32
 	TurnId          string // 当前手
 	MsgChannel      chan *pb.ChessStep
-	LoginoutChannel chan string
+	LoginoutChannel chan string // 登出
 
 	GoBangTemp [15][15]*Piece // 对局辅助信息 用来标志每个位置的四个方向的连珠数
 }
@@ -60,12 +60,12 @@ func RoomLogic(room *Room) {
 	PlayerMapLock.RUnlock()
 
 	//分别给红方、黑方发送对手 消息
-	res := SendMsg(&pb.S2CMatch{
+	res := MsgToBytes(&pb.S2CMatch{
 		Color:  pb.ColorType_ColorTypeBlack,
 		Result: pb.MatchResult_MatResultSuccess,
 	}, pb.ProtocolType_ES2CMatch)
 	redPlayer.Sess.SendChannel <- res
-	res = SendMsg(&pb.S2CMatch{
+	res = MsgToBytes(&pb.S2CMatch{
 		Color:  pb.ColorType_ColorTypeRed,
 		Result: pb.MatchResult_MatResultSuccess,
 	}, pb.ProtocolType_ES2CMatch)
@@ -78,10 +78,16 @@ func RoomLogic(room *Room) {
 	room.LoginoutChannel = make(chan string)
 	room.CreateTime = time.Now().Unix()
 	go func() {
+		defer func() {
+			RoomOpenIdMap.Delete(room.RedId)
+			RoomOpenIdMap.Delete(room.BlackId)
+			log.Debugf("room destroyed! Red:%v Black:%v", redPlayer.OpenId, blackPlayer.OpenId)
+		}()
 		d := time.Second * 2
 		t := time.NewTimer(d)
 		defer t.Stop()
 		var finished = false
+	L:
 		for {
 			select {
 			case <-t.C:
@@ -93,7 +99,7 @@ func RoomLogic(room *Room) {
 			case openIdTmp, ok := <-room.LoginoutChannel:
 				{
 					if !ok {
-						break
+						break L
 					}
 					room, ok := RoomOpenIdMap.Load(openIdTmp)
 					if !ok {
@@ -101,21 +107,21 @@ func RoomLogic(room *Room) {
 					}
 					r := room.(*Room)
 					if r.BlackId == openIdTmp {
-						redPlayer.Sess.SendChannel <- SendMsg(&pb.S2CPushMessage{
+						redPlayer.Sess.SendChannel <- MsgToBytes(&pb.S2CPushMessage{
 							Msg: "YOU WIN!",
 						}, pb.ProtocolType_ES2CPushMsg)
 					} else if r.RedId == openIdTmp {
-						blackPlayer.Sess.SendChannel <- SendMsg(&pb.S2CPushMessage{
+						blackPlayer.Sess.SendChannel <- MsgToBytes(&pb.S2CPushMessage{
 							Msg: "YOU WIN!",
 						}, pb.ProtocolType_ES2CPushMsg)
 					}
 
 					finished = true
 				}
-			case step, o := <-room.MsgChannel:
+			case step, ok := <-room.MsgChannel:
 				{
-					if !o {
-						break
+					if !ok {
+						break L
 					}
 					if !isPosValid(room, step.Point) {
 						log.Debugf("%v step to an wrong pos (%v)", step.Point.Camp, step.Point)
@@ -144,7 +150,7 @@ func RoomLogic(room *Room) {
 
 					// 更新棋盘数据
 					updateGobangTemp(room, step.Point.X, step.Point.Y)
-					res := SendMsg(&pb.S2CStep{
+					res := MsgToBytes(&pb.S2CStep{
 						Error: nil,
 						GobangInfo: &pb.GobangInfo{
 							ChessSteps: room.ChessStepList,
@@ -162,10 +168,10 @@ func RoomLogic(room *Room) {
 					// 判断胜负
 					winId, isWin := WhoWin(room)
 					if isWin {
-						wRes := SendMsg(&pb.S2CGameResult{
+						wRes := MsgToBytes(&pb.S2CGameResult{
 							Result: pb.GameResult_GameResultWin,
 						}, pb.ProtocolType_ES2CGameResult)
-						lRes := SendMsg(&pb.S2CGameResult{
+						lRes := MsgToBytes(&pb.S2CGameResult{
 							Result: pb.GameResult_GameResultFail,
 						}, pb.ProtocolType_ES2CGameResult)
 
@@ -180,10 +186,10 @@ func RoomLogic(room *Room) {
 						err := dbProxy.Transaction(func(session *xorm.Session) (interface{}, error) {
 							rUser := &User{}
 							bUser := &User{}
-							if _, err := session.Where("open_id = ?", redPlayer.OpenId).Get(rUser); err != nil {
+							if _, err := session.ID(redPlayer.OpenId).Get(rUser); err != nil {
 								return nil, errors.New("cannot get the user")
 							}
-							if _, err := session.Where("open_id = ?", blackPlayer.OpenId).Get(bUser); err != nil {
+							if _, err := session.ID(blackPlayer.OpenId).Get(bUser); err != nil {
 								return nil, errors.New("cannot get the user")
 							}
 							if winId == redPlayer.OpenId {
@@ -197,10 +203,10 @@ func RoomLogic(room *Room) {
 								rUser.Score--
 								rUser.FailedCount++
 							}
-							if _, err := session.Where("open_id = ?", redPlayer.OpenId).Update(rUser); err != nil {
+							if _, err := session.ID(rUser.OpenId).Update(rUser); err != nil {
 								return nil, errors.New("cannot update the user")
 							}
-							if _, err := session.Where("open_id = ?", blackPlayer.OpenId).Update(bUser); err != nil {
+							if _, err := session.ID(bUser.OpenId).Update(bUser); err != nil {
 								return nil, errors.New("cannot update the user")
 							}
 							race := &Race{
@@ -227,11 +233,6 @@ func RoomLogic(room *Room) {
 				break
 			}
 		}
-		defer func() {
-			RoomOpenIdMap.Delete(room.RedId)
-			RoomOpenIdMap.Delete(room.BlackId)
-			log.Debugf("room destroyed! Red:%v Black:%v", redPlayer.OpenId, blackPlayer.OpenId)
-		}()
 	}()
 	log.Debugf("create room success, RedId:%v, BlackId:%v", room.RedId, room.BlackId)
 }
@@ -391,7 +392,7 @@ func onRoomPlayerLogin(params ...interface{}) {
 	param := params[0].(*NotifyRoleLoginParam)
 	if room, ok := RoomOpenIdMap.Load(param.OpenId); ok {
 		if user := GetPlayerByOpenId(param.OpenId); user != nil {
-			res := SendMsg(&pb.S2CStep{
+			res := MsgToBytes(&pb.S2CStep{
 				GobangInfo: &pb.GobangInfo{ChessSteps: room.(*Room).ChessStepList},
 			}, pb.ProtocolType_ES2CStep)
 			user.Sess.SendChannel <- res

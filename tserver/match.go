@@ -22,9 +22,14 @@ func initMatch() {
 	// 匹配线程
 	go func() {
 		pair := make([]*MatchItem, 0)
+	L:
 		for {
 			select {
-			case item := <-matchPool:
+			case item, ok := <-matchPool:
+				if !ok {
+					log.Error("matchPool channel get error!!!")
+					break L
+				}
 				pair = append(pair, item)
 				log.Debugf("Join match queue success! OpenId:%v", item.OpenId)
 
@@ -45,7 +50,11 @@ func initMatch() {
 					pair = make([]*MatchItem, 0)
 					log.Debugf("Match success! %v vs %v", room.RedId, room.BlackId)
 				}
-			case item := <-cancelPool:
+			case item, ok := <-cancelPool:
+				if !ok {
+					log.Error("cancelPool channel get error!!!")
+					break L
+				}
 				for i, p := range pair {
 					if p.OpenId == item.OpenId {
 						pair = append(pair[:i], pair[i+1:]...)
@@ -58,7 +67,7 @@ func initMatch() {
 				}
 				// 返回取消匹配成功
 				if player := GetPlayerByOpenId(item.OpenId); player != nil {
-					tmp := SendMsg(&pb.S2CMatch{
+					tmp := MsgToBytes(&pb.S2CMatch{
 						Result: pb.MatchResult_MatResultCancel,
 					}, pb.ProtocolType_ES2CMatch)
 					player.Sess.SendChannel <- tmp

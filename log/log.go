@@ -54,54 +54,54 @@ func Debugf(format string, params ...interface{}) {
 		return
 	}
 	log.SetPrefix("[DEBUG] ")
-	log.Output(callDepth, fmt.Sprintf(format, params...))
+	_ = log.Output(callDepth, fmt.Sprintf(format, params...))
 }
 func Debug(msg string) {
 	if myLogger.logLevel&LogLevelDEBUG == 0 {
 		return
 	}
 	log.SetPrefix("[DEBUG] ")
-	log.Output(callDepth, msg)
+	_ = log.Output(callDepth, msg)
 }
 func Infof(format string, params ...interface{}) {
 	if myLogger.logLevel&LogLevelINFO == 0 {
 		return
 	}
 	log.SetPrefix("[INFO] ")
-	log.Output(callDepth, fmt.Sprintf(format, params...))
+	_ = log.Output(callDepth, fmt.Sprintf(format, params...))
 }
 func Info(msg string) {
 	if myLogger.logLevel&LogLevelINFO == 0 {
 		return
 	}
 	log.SetPrefix("[INFO] ")
-	log.Output(callDepth, msg)
+	_ = log.Output(callDepth, msg)
 }
 func Warnf(format string, params ...interface{}) {
 	if myLogger.logLevel&LogLevelWARN == 0 {
 		return
 	}
 	log.SetPrefix("[WARN] ")
-	log.Output(callDepth, fmt.Sprintf(format, params...))
+	_ = log.Output(callDepth, fmt.Sprintf(format, params...))
 }
 func Warn(msg string) {
 	if myLogger.logLevel&LogLevelWARN == 0 {
 		return
 	}
 	log.SetPrefix("[WARN] ")
-	log.Output(callDepth, msg)
+	_ = log.Output(callDepth, msg)
 }
 func Errorf(format string, params ...interface{}) {
 	if myLogger.logLevel&LogLevelERROR == 0 {
 		return
 	}
 	log.SetPrefix("[ERROR] ")
-	log.Output(callDepth, fmt.Sprintf(format, params...))
+	_ = log.Output(callDepth, fmt.Sprintf(format, params...))
 }
 func Error(msg string) {
 	if myLogger.logLevel&LogLevelERROR == 0 {
 		return
 	}
 	log.SetPrefix("[ERROR] ")
-	log.Output(callDepth, msg)
+	_ = log.Output(callDepth, msg)
 }

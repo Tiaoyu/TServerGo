@@ -98,8 +98,11 @@ func OnLogin(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	log.Debugf("OnLogin Receive msg:%v, OpenId:%v", req, sess.OpenId)
 
 	player := &Player{
-		OpenId: strings.TrimSpace(req.NickName),
-		Sess:   sess,
+		OpenId:   strings.TrimSpace(req.UserId),
+		NickName: strings.TrimSpace(req.NickName),
+		Avatar:   strings.TrimSpace(req.AvatarUrl),
+		Sess:     sess,
+		State:    0,
 	}
 	err := PlayerLogin(player)
 	if err != nil {
@@ -136,7 +139,7 @@ func OnMatch(sess *UserSession, msg []byte) ([]byte, uint32, error) {
 	if err := proto.Unmarshal(msg, req); err != nil {
 		log.Errorf("Failed to parse C2SMatch:%v", err)
 	}
-	log.Debugf("OnMatch Receive msg:%v, OpenId:%v", req, sess)
+	log.Debugf("OnMatch Receive msg:%v, OpenId:%v", req, sess.OpenId)
 	player, ok := PlayerOpenIdMap[sess.OpenId]
 	if !ok {
 		return nil, 0, nil

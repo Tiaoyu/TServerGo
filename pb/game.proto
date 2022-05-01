@@ -4,6 +4,7 @@ option go_package = "tiaoyuyu.com/pb";
 option java_multiple_files = true;
 option java_package = "pb";
 option java_outer_classname = "pb";
+
 package pb;
 
 import "enum.proto";
@@ -45,6 +46,7 @@ message S2CPing {
 message C2SLogin {
   string NickName = 1;  // 昵称
   string AvatarUrl = 2; // 头像
+  string UserId = 3;    //账号ID
 }
 message S2CLogin { Error error = 1; }
 

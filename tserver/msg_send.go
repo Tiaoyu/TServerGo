@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func SendMsg(message proto.Message, t pb.ProtocolType) []byte {
+func MsgToBytes(message proto.Message, t pb.ProtocolType) []byte {
 	ack, err := proto.Marshal(message)
 	if err != nil {
 		return nil

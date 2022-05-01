@@ -18,9 +18,11 @@ const (
 
 // Player 玩家数据
 type Player struct {
-	OpenId string
-	Sess   *UserSession
-	State  PlayerState
+	OpenId   string
+	NickName string
+	Avatar   string
+	Sess     *UserSession
+	State    PlayerState
 }
 
 var (
@@ -49,14 +51,12 @@ func PlayerLogin(u *Player) error {
 	fun := func(session *xorm.Session) (interface{}, error) {
 		user := &User{}
 		has, err := session.Where("open_id=?", u.OpenId).Get(user)
+		user.UserName = u.NickName
 		if err != nil || !has {
 			user.OpenId = u.OpenId
-			res, err := session.Insert(user)
-			return res, err
+			return session.Insert(user)
 		} else if has {
-			user.OpenId = u.OpenId
-			res, err := session.Update(user)
-			return res, err
+			return session.ID(user.OpenId).Update(user)
 		}
 		return nil, err
 	}
