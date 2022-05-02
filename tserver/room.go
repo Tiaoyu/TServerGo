@@ -61,13 +61,17 @@ func RoomLogic(room *Room) {
 
 	//分别给红方、黑方发送对手 消息
 	res := MsgToBytes(&pb.S2CMatch{
-		Color:  pb.ColorType_ColorTypeBlack,
-		Result: pb.MatchResult_MatResultSuccess,
+		EnemyName:      blackPlayer.NickName,
+		EnemyAvatarUrl: blackPlayer.Avatar,
+		Color:          pb.ColorType_ColorTypeRed,
+		Result:         pb.MatchResult_MatResultSuccess,
 	}, pb.ProtocolType_ES2CMatch)
 	redPlayer.Sess.SendChannel <- res
 	res = MsgToBytes(&pb.S2CMatch{
-		Color:  pb.ColorType_ColorTypeRed,
-		Result: pb.MatchResult_MatResultSuccess,
+		EnemyName:      redPlayer.NickName,
+		EnemyAvatarUrl: redPlayer.Avatar,
+		Color:          pb.ColorType_ColorTypeBlack,
+		Result:         pb.MatchResult_MatResultSuccess,
 	}, pb.ProtocolType_ES2CMatch)
 	blackPlayer.Sess.SendChannel <- res
 
